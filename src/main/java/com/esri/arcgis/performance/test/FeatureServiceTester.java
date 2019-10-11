@@ -16,7 +16,7 @@ public class FeatureServiceTester {
   public static void main(String[] args) {
 
     int numParameters = args.length;
-    if (numParameters == 2) {
+    if (numParameters == 3) {
       testVariousRequestsWithoutStats(args);
     } else if (numParameters >= 4) {
       testVariousRequestsWithStats(args);

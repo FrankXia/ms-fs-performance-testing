@@ -1,7 +1,11 @@
 package com.esri.arcgis.performance.test;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -69,10 +73,24 @@ public class FeatureService {
     requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
     requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
 
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setDefaultRequestConfig(requestBuilder.build());
+    String userName = System.getenv("A4IOT_USER");
+    String password = System.getenv("A4IOT_PASSWORD");
+    if(userName != null && password != null) {
+      CredentialsProvider provider = new BasicCredentialsProvider();
+      UsernamePasswordCredentials credentials
+              = new UsernamePasswordCredentials(userName, password);
+      provider.setCredentials(AuthScope.ANY, credentials);
+
+      HttpClientBuilder builder = HttpClientBuilder.create();
+      builder.setDefaultCredentialsProvider(provider);
+      builder.setDefaultRequestConfig(requestBuilder.build());
 //    builder.disableAutomaticRetries();
-    httpClient = builder.build();
+      httpClient = builder.build();
+    } else {
+      System.out.println("ERROR: You must set 2 environment variables: A4IOT_USER and A4IOT_PASSWORD from accessing your A4IoT services. ");
+      System.out.println("       If your password contains some special characters, you need to add single quote in the beginning and the end of your password.");
+      System.exit(0);
+    }
 
     this.timeoutInSeconds = timeoutInSeconds;
   }
