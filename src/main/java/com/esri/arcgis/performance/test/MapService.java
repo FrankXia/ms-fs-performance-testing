@@ -24,11 +24,11 @@ public class MapService {
   private String host;
   private int port;
   private String serviceName;
+  private String servicesUrl;
   private int timeoutInSeconds = 60; // seconds
 
-  public MapService(String host, int port, String serviceName, int timeoutInSeconds) {
-    this.host = host;
-    this.port = port;
+  public MapService(String servicesUrl, String serviceName, int timeoutInSeconds) {
+    this.servicesUrl = servicesUrl.endsWith("/")? servicesUrl : servicesUrl + "/";
     this.serviceName = serviceName;
 
     RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -48,7 +48,7 @@ public class MapService {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
 
-    String url = "http://" + host + ":" + port + "/arcgis/rest/services/" + serviceName + "/MapServer/export?" + getParameters();
+    String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
     long response = Utils.executeHttpGETRequest(httpClient, url, serviceName);
     if (response == -1) {
       System.out.println("?????? failed to export image!");
@@ -79,7 +79,7 @@ public class MapService {
     this.aggregationStyle = aggregationStyle;
 
     long start = System.currentTimeMillis();
-    String url = "http://" + host + ":" + port + "/arcgis/rest/services/" + serviceName + "/MapServer/export?" + getParameters();
+    String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
     long response = Utils.executeHttpGETRequest(httpClient,url, serviceName);
 
     // System.out.println(queryParameters.toString());
@@ -111,7 +111,7 @@ public class MapService {
 
 
   Tuple getCount(String where, String boundingBox) {
-    FeatureService featureService = new FeatureService(host, port, serviceName, timeoutInSeconds);
+    FeatureService featureService = new FeatureService(host, serviceName, timeoutInSeconds);
     return featureService.getCount(where, boundingBox);
   }
 

@@ -14,9 +14,8 @@ public class FeatureService {
   private Random random = new Random();
 
   private HttpClient httpClient = HttpClientBuilder.create().build();
-  private String host;
-  private int port;
   private String serviceName;
+  private String servicesUrl;
   private String keyspace = "esri_ds_data";
 
   // 36 parameters
@@ -60,10 +59,9 @@ public class FeatureService {
 
   private int timeoutInSeconds = 60;
 
-  FeatureService(String host, int port, String serviceName, int timeoutInSeconds) {
-    this.host = host;
-    this.port = port;
+  FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds) {
     this.serviceName = serviceName;
+    this.servicesUrl = servicesUrl.endsWith("/") ? servicesUrl : servicesUrl + "/";
     this.outFields = "*";
 
     RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -295,7 +293,7 @@ public class FeatureService {
   private String executeRequest(String queryParameters) {
     HttpClient client = httpClient;
     try {
-      String url = "http://" + host + ":" + port + "/arcgis/rest/services/" + serviceName + "/FeatureServer/0/query?" + queryParameters;
+      String url = servicesUrl + serviceName + "/FeatureServer/0/query?" + queryParameters;
       System.out.println(url);
       //long start = System.currentTimeMillis();
       String result = Utils.executeHttpGET(client, url);

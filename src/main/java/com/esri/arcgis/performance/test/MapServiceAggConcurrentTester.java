@@ -36,26 +36,24 @@ public class MapServiceAggConcurrentTester {
     }
   }
 
-  private static void singleTesting(String host, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds) {
-    int port = 9000;
+  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds) {
     String boundingBox = Utils.getRandomBoundingBox(width, height);
-    MapService mapService = new MapService(host, port, serviceName,timeoutInSeconds);
+    MapService mapService = new MapService(servicesUrl, serviceName,timeoutInSeconds);
     long time = mapService.exportMap(boundingBox, 4326, aggStyle);
     System.out.println( "Time -> " + time);
   }
 
-  private static Callable<Long> createTask(String host, int port, String serviceName, String boundingBox, String aggStyle, int timeoutInSeconds) {
+  private static Callable<Long> createTask(String servicesUrl, String serviceName, String boundingBox, String aggStyle, int timeoutInSeconds) {
     Callable<Long> task = () -> {
-      MapService mapService = new MapService(host, port, serviceName, timeoutInSeconds);
+      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds);
       return mapService.exportMap(boundingBox, 4326, aggStyle);
     };
     return task;
   }
 
-  private static void concurrentTesting(String host, String serviceName, int numbThreads, int numbConcurrentCalls, int width, int height, String aggStyle, int timeoutInSeconds) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, int width, int height, String aggStyle, int timeoutInSeconds) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
-    int port = 9000;
     DecimalFormat df = new DecimalFormat("#.#");
     df.setGroupingUsed(true);
     df.setGroupingSize(3);
@@ -68,7 +66,7 @@ public class MapServiceAggConcurrentTester {
       int lineRead = 0;
       while (lineRead < numbConcurrentCalls) {
         String boundingBox = Utils.getRandomBoundingBox(width, height);
-        callables.add(createTask(host, port, serviceName, boundingBox, aggStyle, timeoutInSeconds));
+        callables.add(createTask(servicesUrl, serviceName, boundingBox, aggStyle, timeoutInSeconds));
         lineRead++;
       }
 

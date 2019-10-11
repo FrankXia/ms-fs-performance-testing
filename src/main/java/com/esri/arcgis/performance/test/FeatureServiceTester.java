@@ -16,7 +16,7 @@ public class FeatureServiceTester {
   public static void main(String[] args) {
 
     int numParameters = args.length;
-    if (numParameters == 3) {
+    if (numParameters == 2) {
       testVariousRequestsWithoutStats(args);
     } else if (numParameters >= 4) {
       testVariousRequestsWithStats(args);
@@ -31,7 +31,7 @@ public class FeatureServiceTester {
   private static void testVariousRequestsWithStats(String[] args) {
 
     if (args.length < 4) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester <Host name> <Service name> <Group By field name> <Out statistics> {<Bounding Box>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester <Services Url> <Service name> <Group By field name> <Out statistics> {<Bounding Box>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa30m dest \"[" +
           "{\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
@@ -39,8 +39,7 @@ public class FeatureServiceTester {
           "{\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"max_speed\\\"}" +
           "]\"");
     } else {
-      int serverPort = 9000;
-      String host = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       String groupbyFdName = args[2];
       String outStats = args[3];
@@ -48,7 +47,7 @@ public class FeatureServiceTester {
 
       String boundingBox = (args.length == 5)? args[4] : null;
 
-      FeatureService featureService = new FeatureService(host, serverPort, serviceName, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
       featureService.doGroupByStats("1=1", groupbyFdName, outStats, boundingBox);
 
     }
@@ -58,7 +57,7 @@ public class FeatureServiceTester {
   private static void testVariousRequestsWithoutStats(String[] args) {
 
     if (args.length < 3) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester <Host name> <Service name> <Option codes: 0 -> 8> ");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester <Services Url> <Service Name> <Option codes: 0 -> 8> ");
       System.out.println("Code stands for: ");
       System.out.println("0 -> get total counts for all services ");
       System.out.println("1 -> all:  1=1, limit=10,000 ");
@@ -74,30 +73,29 @@ public class FeatureServiceTester {
       System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa10m 1,2,3");
     } else {
 
-      int serverPort = 9000;
+      String servicesUrl = args[0];
       String[] tableNames = new String[]{args[1]}; // new String[]{"faa10k", "faa100k", "faa1m", "faa3m", "faa5m", "faa10m", "faa30m", "faa300m"};
 
       String pattern = "yyyy-MM-dd HH:mm:ss";
       simpleDateFormat = new SimpleDateFormat(pattern);
       simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-      String hostName = args[0];
       String codes = args[2];
-      if (codes.contains("0")) testTotalCountForAll(hostName, serverPort, tableNames);
-      if (codes.contains("1")) testGetFeaturesForAll(hostName, serverPort, tableNames);
-      if (codes.contains("2")) testGetFeaturesWithSpeedRange(hostName, serverPort, tableNames);
-      if (codes.contains("3")) testGetFeaturesWithSQLIn(hostName, serverPort, tableNames);
-      if (codes.contains("4")) testGetFeaturesWithBoundingBox(hostName, serverPort, tableNames, 20);
+
+      if (codes.contains("0")) testTotalCountForAll(servicesUrl, tableNames);
+      if (codes.contains("1")) testGetFeaturesForAll(servicesUrl, tableNames);
+      if (codes.contains("2")) testGetFeaturesWithSpeedRange(servicesUrl, tableNames);
+      if (codes.contains("3")) testGetFeaturesWithSQLIn(servicesUrl, tableNames);
+      if (codes.contains("4")) testGetFeaturesWithBoundingBox(servicesUrl, tableNames, 20);
       if (codes.contains("5")) System.out.println("To be implemented!");
 
-      if (codes.contains("6")) testGetFeaturesWithTimeExtent(hostName, serverPort, tableNames);
-      if (codes.contains("7")) testGFeaturesWithBoundingBoxAndTimeExtent(hostName, serverPort, tableNames, 35);
+      if (codes.contains("6")) testGetFeaturesWithTimeExtent(servicesUrl, tableNames);
+      if (codes.contains("7")) testGFeaturesWithBoundingBoxAndTimeExtent(servicesUrl, tableNames, 35);
       // if bounding box too small, the table/service may return 0 feature.
-      if (codes.contains("8")) testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(hostName, serverPort, tableNames, 60);
+      if (codes.contains("8")) testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(servicesUrl, tableNames, 60);
     }
   }
 
-  private static void testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(String hostName, int port, String[] tableNames, double boundingBoxWidth) {
+  private static void testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(String hostName, String[] tableNames, double boundingBoxWidth) {
     System.out.println("======== get features from each service with a 10 degree random bounding box and time extent and IN parameter ========= ");
 
     String fieldName = "orig";
@@ -108,7 +106,7 @@ public class FeatureServiceTester {
 
     try {
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(hostName, table, timeoutInSeconds);
         String mTimestamp = getTimeExtent(featureService, timeFieldName);
         String where = getUniqueValuesForIN(featureService, fieldName, isStringField);
         featureService.getFeaturesWithWhereClauseAndBoundingBoxAndTimeExtent(where, boundingBox, mTimestamp);
@@ -118,14 +116,14 @@ public class FeatureServiceTester {
     }
   }
 
-  private static void testGFeaturesWithBoundingBoxAndTimeExtent(String hostName, int port, String[] tableNames, double boundingBoxWidth) {
+  private static void testGFeaturesWithBoundingBoxAndTimeExtent(String servicesUrl, String[] tableNames, double boundingBoxWidth) {
     System.out.println("======== get features from each service with a 10 degree random bounding box and time extent ========= ");
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
 
     String fieldName = "ts";
     try {
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
         String mTimestamp = getTimeExtent(featureService, fieldName);
         featureService.getFeaturesWithWhereClauseAndBoundingBoxAndTimeExtent("1=1", boundingBox, mTimestamp);
       }
@@ -134,14 +132,14 @@ public class FeatureServiceTester {
     }
   }
 
-  private static void testGetFeaturesWithSQLIn(String hostName, int port, String[] tableNames) {
+  private static void testGetFeaturesWithSQLIn(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with sSQL IN (xxx,xxx) ========= ");
     String fieldName = "plane_id";
     boolean isStringField = false;
 
     try {
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
         String where = getUniqueValuesForIN(featureService, fieldName, isStringField);
         featureService.getFeaturesWithWhereClause(where);
       }
@@ -150,7 +148,7 @@ public class FeatureServiceTester {
     }
   }
 
-  private static void testGetFeaturesWithTimeExtent(String hostName, int port, String[] tableNames) {
+  private static void testGetFeaturesWithTimeExtent(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with time filter ========= ");
     String fieldName = "ts";
     String pattern = "yyyy-MM-dd HH:mm:ss";
@@ -158,7 +156,7 @@ public class FeatureServiceTester {
     simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     try {
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
         String mTimestamp = getTimeExtent(featureService, fieldName);
         featureService.getFeaturesWithTimeExtent("1=1", mTimestamp);
       }
@@ -167,41 +165,41 @@ public class FeatureServiceTester {
     }
   }
 
-  private static void testGetFeaturesWithSpeedRange(String hostName, int port, String[] tableNames) {
+  private static void testGetFeaturesWithSpeedRange(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with speed range ========= ");
     String fieldName = "speed";
-    testWithStatsAsWhereClause(fieldName, hostName, port, tableNames);
+    testWithStatsAsWhereClause(fieldName, servicesUrl, tableNames);
   }
 
-  private static void testGetFeaturesWithBoundingBox(String hostName, int port, String[] tableNames, double boundingBoxWidth) {
+  private static void testGetFeaturesWithBoundingBox(String servicesUrl, String[] tableNames, double boundingBoxWidth) {
     System.out.println("======== get features from each service with a 10 degree random bounding box ========= ");
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
       featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox);
     }
   }
   
-  private static void testGetFeaturesForAll(String hostName, int port, String[] tableNames) {
+  private static void testGetFeaturesForAll(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with a random offset ========= ");
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
       boolean useOffset =  !table.contains("10k");
       featureService.getFeaturesWithWhereClauseAndRandomOffset("1=1", useOffset);
     }
   }
   
-  private static void testTotalCountForAll(String hostName, int port, String[] tableNames) {
+  private static void testTotalCountForAll(String servicesUrl, String[] tableNames) {
     System.out.println("======== get total count for each service ========= ");
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
       featureService.getCount("1=1");
     }
   }
 
-  private static void testWithStatsAsWhereClause(String fieldName, String hostName, int port, String[] tableNames) {
+  private static void testWithStatsAsWhereClause(String fieldName, String servicesUrl, String[] tableNames) {
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(hostName, port, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
       JSONObject stats = featureService.getFieldStats(fieldName);
       double min = stats.getDouble("min");
       double max = stats.getDouble("max");

@@ -20,7 +20,7 @@ public class FeatureServiceWithStatsTester {
 
   private static void testVariousRequestsWithStats(String[] args) {
     if (args.length < 6) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithStatsTester <Host name> <Service name> <Group By field name> <Number of runs> <Timeout in seconds> <Out statistics> {<Bounding Box>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithStatsTester <Services Url> <Service name> <Group By field name> <Number of runs> <Timeout in seconds> <Out statistics> {<Bounding Box>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa30m dest 20 120 \"[" +
           "{\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
@@ -28,8 +28,7 @@ public class FeatureServiceWithStatsTester {
           "{\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"max_speed\\\"}" +
           "]\"");
     } else {
-      int serverPort = 9000;
-      String host = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       String groupbyFdName = args[2];
       int numRuns = Integer.parseInt(args[3]);
@@ -45,7 +44,7 @@ public class FeatureServiceWithStatsTester {
           double width = Double.parseDouble(args[6]);
           boundingBox = Utils.getRandomBoundingBox(width, width);
         }
-        FeatureService featureService = new FeatureService(host, serverPort, serviceName, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
         Tuple tuple = featureService.doGroupByStats("1=1", groupbyFdName, outStats, boundingBox);
         stats[i] = tuple.requestTime * 1.0;
       }

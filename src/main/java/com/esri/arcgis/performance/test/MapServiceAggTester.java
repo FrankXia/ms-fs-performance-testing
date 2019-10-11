@@ -20,13 +20,12 @@ public class MapServiceAggTester {
 
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggTester " +
-          "<Host name> <Service name> <Number of calls> <Bounding box width> <Bounding box height> <Aggregation style>  {<Timeout in seconds: 60>}");
+          "<Services Url> <Service name> <Number of calls> <Bounding box width> <Bounding box height> <Aggregation style>  {<Timeout in seconds: 60>}");
     }
   }
 
-  private static void singleTesting(String host, String serviceName, int width, int height, String aggStyle, int numCalls, int timeoutInSeconds) {
-    int port = 9000;
-    MapService mapService = new MapService(host, port, serviceName, timeoutInSeconds);
+  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int numCalls, int timeoutInSeconds) {
+    MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds);
     Double[] times = new Double[numCalls];
     for (int index=0; index < numCalls; index++) {
       String boundingBox = Utils.getRandomBoundingBox(width, height);

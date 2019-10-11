@@ -14,8 +14,7 @@ public class FeatureServiceWithRandomBBoxTester {
       System.out.println("Sample: ");
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester localhost faa10m  faa10m_es.txt 100");
     } else {
-      String host = args[0];
-      int port = 9000;
+      String servicesUrl = args[0];
       String table = args[1];
       String fileName = args[2];
       int numTests = Integer.parseInt(args[3]);
@@ -23,14 +22,14 @@ public class FeatureServiceWithRandomBBoxTester {
       if (args.length > 4) timeoutInSeconds = Integer.parseInt(args[4]);
       int startingEntry = -1;
       if (args.length > 5) startingEntry = Integer.parseInt(args[5]);
-      testGetFeaturesWithBoundingBox(host, port, table, fileName, numTests, timeoutInSeconds, startingEntry);
+      testGetFeaturesWithBoundingBox(servicesUrl, table, fileName, numTests, timeoutInSeconds, startingEntry);
     }
 
   }
 
-  private static void testGetFeaturesWithBoundingBox(String hostName, int port, String tableName, String boundingBoxFileName, int numbTests, int timeoutInSeconds, int startingEntry) throws IOException {
+  private static void testGetFeaturesWithBoundingBox(String servicesUrl, String tableName, String boundingBoxFileName, int numbTests, int timeoutInSeconds, int startingEntry) throws IOException {
     System.out.println("======== get features from each service with a random bounding box that contains less than 10k features ========= bbox file => " + boundingBoxFileName + ", # of tests => " + numbTests + ", timeout => " + timeoutInSeconds);
-    FeatureService featureService = new FeatureService(hostName, port, tableName, timeoutInSeconds);
+    FeatureService featureService = new FeatureService(servicesUrl, tableName, timeoutInSeconds);
     BufferedReader reader = new BufferedReader(new FileReader(boundingBoxFileName));
     int modNumber = (numbTests < 150) ? 100 : (250 - numbTests);
     int startIndex = (int) (new Random().nextDouble() * modNumber);

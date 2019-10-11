@@ -35,7 +35,7 @@ public class FeatureServiceConcurrentTester {
 
       concurrentTesting(host, serviceName, numThreads, numCalls, groupByFieldName, outStatisitcs, width, height, timeoutInSeconds);
     } else {
-      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceConcurrentTester <Host name> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Group By field name> <Out Statistics> {<bounding box width (180)> <bounding box height (90)> <Timeout in seconds>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceConcurrentTester <Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Group By field name> <Out Statistics> {<bounding box width (180)> <bounding box height (90)> <Timeout in seconds>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceConcurrentTester localhost faa30m 4 4 dest  \"[" +
           " {\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
@@ -46,18 +46,17 @@ public class FeatureServiceConcurrentTester {
     }
   }
 
-  private static Callable<Tuple> createTask(String host, int port, String serviceName, String groupByFieldName, String outStatisitcs, String boundingBox, int timeoutInSeconds) {
+  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String groupByFieldName, String outStatisitcs, String boundingBox, int timeoutInSeconds) {
     Callable<Tuple> task = () -> {
-      FeatureService featureService = new FeatureService(host, port, serviceName, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
       return featureService.doGroupByStats("1=1", groupByFieldName, outStatisitcs, boundingBox);
     };
     return task;
   }
 
-  private static void concurrentTesting(String host, String serviceName, int numbThreads, int numbConcurrentCalls, String groupByFieldName, String outStatistics, double width, double height, int timeoutInSeconds) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, String groupByFieldName, String outStatistics, double width, double height, int timeoutInSeconds) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
-    int port = 9000;
     DecimalFormat df = new DecimalFormat("#.#");
     df.setGroupingUsed(true);
     df.setGroupingSize(3);
@@ -67,7 +66,7 @@ public class FeatureServiceConcurrentTester {
     try {
       for (int index=0; index < numbConcurrentCalls; index++) {
         String boundingBox = Utils.getRandomBoundingBox(width, height);
-        callables.add(createTask(host, port, serviceName, groupByFieldName, outStatistics, boundingBox, timeoutInSeconds));
+        callables.add(createTask(servicesUrl, serviceName, groupByFieldName, outStatistics, boundingBox, timeoutInSeconds));
       }
 
       Stream<Tuple> results =

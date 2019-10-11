@@ -13,15 +13,13 @@ public class GenerateBoundingBox {
   private static void getBoundingBoxWith10kFeatures(String[] args) {
     if (args == null || args.length < 3) {
       System.out.println("Usage: java -cp ./ms-ms-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.GenerateBoundingBox " +
-          "<Host Name> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000>}");
+          "<Services Url> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000>}");
       return;
     }
-
-    int port = 9000;
     int limitMax = 10000;
     int limitMin = 9900;
 
-    String host = args[0];
+    String servicesUrl = args[0];
     String name = args[1];
     String fileName = "./" + args[2];
 
@@ -44,7 +42,7 @@ public class GenerateBoundingBox {
 
       int validCount = 0;
       while (validCount < numBBoxes) {
-        String boundingBox = getBbox(host, port, name, limitMin, limitMax, width, height, validCount);
+        String boundingBox = getBbox(servicesUrl, name, limitMin, limitMax, width, height, validCount);
         writer.append(boundingBox);
         writer. newLine();
         validCount++;
@@ -80,7 +78,7 @@ public class GenerateBoundingBox {
     return new MinXY(minx, miny);
   }
 
-  static String getBbox(String host, int port, String serviceName, int limitMin, int limitMax, double initWidth, double initHeight,  int count) {
+  static String getBbox(String servicesUrl, String serviceName, int limitMin, int limitMax, double initWidth, double initHeight,  int count) {
     String bbox;
     long numFeatures;
     while (true) {
@@ -95,7 +93,7 @@ public class GenerateBoundingBox {
       double height = maxy - miny;
 
       bbox = minx +"," + miny + "," +maxx+","+maxy;
-      MapService mapService = new MapService(host, port, serviceName, 100);
+      MapService mapService = new MapService(servicesUrl, serviceName, 100);
       numFeatures = mapService.getCount("1=1", bbox).returnedFeatures;
       bbox = bbox + "|" + numFeatures;
 
