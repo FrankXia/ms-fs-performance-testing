@@ -12,7 +12,7 @@ public class GenerateBoundingBox {
 
   private static void getBoundingBoxWith10kFeatures(String[] args) {
     if (args == null || args.length < 3) {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.GenerateBoundingBox " +
+      System.out.println("Usage: java -cp ./ms-ms-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.GenerateBoundingBox " +
           "<Host Name> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000>}");
       return;
     }

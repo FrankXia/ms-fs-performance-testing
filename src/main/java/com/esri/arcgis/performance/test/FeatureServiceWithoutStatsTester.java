@@ -32,7 +32,7 @@ public class FeatureServiceWithoutStatsTester {
   private static void testVariousRequestsWithoutStats(String[] args) {
 
     if (args.length < 3) {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester " +
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester " +
           "<Host name> <Service name> <Option code: 0 -> 8> {<Number of runs = 20> <Timeout in seconds = 120> <Bounding box width> and/or <Time extent relative to the maximum time extent in percentage = 5>}");
       System.out.println("Code stands for: ");
       System.out.println("0 -> get total counts for all services ");
@@ -47,22 +47,22 @@ public class FeatureServiceWithoutStatsTester {
       System.out.println("9 -> spatiotemporal extent with attribute group:  flightId IN ('1234', '5678') AND geometry INSIDE bounding box AND time > t1 and time < t2 AND GroupBy One hour limit=10,000 for all services ");
 
       System.out.println("Samples: ");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 0");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 1");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 2 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 0");
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 1");
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 2 " +
           "20 120 speed 5 (20 -> runs, 120 -> timeout, speed -> plane speed field name, 5 -> the percentage of the speed range) ");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 3 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 3 " +
           "20 120 plane_id false (20 -> runs, 120 -> timeout, plane_id -> unique id field name, false -> is String field)");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 4 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 4 " +
           "20 120 25 (20 -> runs, 120 -> timeout, 25 -> bounding box width");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 5");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 6 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 5");
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 6 " +
           "20 120 ts 10 (20 -> runs, 120 -> timeout, ts -> time field name, 5 -> time window percentage)");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 7 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 7 " +
           "20 120 35 ts 5 (20 -> runs, 120 -> timeout, 35 -> bounding box width, ts -> time field name, 5 -> time window percentage)");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 8 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 8 " +
           "20 120 60 ts 5 orig true (20 -> runs, 120 -> timeout, 60 -> bounding box width, ts -> time field name, 5 -> time window percentage, orig -> unique value field name, true -> is it a string field)");
-      System.out.println("java -cp  ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithoutStatsTester localhost faa10m 9 " +
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithoutStatsTester localhost faa10m 9 " +
           "20 120 60 ts 5 orig true 3 1 hours (20 -> runs, 120 -> timeout, 60 -> bounding box width, ts -> time field name, 5 -> time window percentage, orig -> unique value field name, " +
           "true -> is it a string field, 3 -> Lod, 1 -> time interval, hours -> time unit)");
 

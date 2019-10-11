@@ -31,7 +31,7 @@ public class MapServiceAggConcurrentTester {
         concurrentTesting(hostName, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds);
       }
     } else {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.MapServiceAggConcurrentTester " +
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggConcurrentTester " +
           "<Host name> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Bounding box width> <Bounding box height> <Aggregation style> {<Timeout in seconds: 60>}");
     }
   }

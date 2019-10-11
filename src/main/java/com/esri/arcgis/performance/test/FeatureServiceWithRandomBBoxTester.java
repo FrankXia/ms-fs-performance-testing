@@ -9,10 +9,10 @@ public class FeatureServiceWithRandomBBoxTester {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 4) {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithRandomBBoxTester" +
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester" +
           " <Host name> <Service name> <Bounding box file name> <Number of tests> {<Timeout in seconds: 120> <Starting entry> }");
       System.out.println("Sample: ");
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.FeatureServiceWithRandomBBoxTester localhost faa10m  faa10m_es.txt 100");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester localhost faa10m  faa10m_es.txt 100");
     } else {
       String host = args[0];
       int port = 9000;

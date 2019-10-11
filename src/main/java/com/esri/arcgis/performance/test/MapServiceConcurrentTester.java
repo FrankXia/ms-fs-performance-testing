@@ -26,7 +26,7 @@ public class MapServiceConcurrentTester {
 
       concurrentTesting(hostName, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds);
     } else {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.MapServiceConcurrentTester " +
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceConcurrentTester " +
           "<Host name> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Path to bounding box file> <Number of lines to skip> {<Timeout in seconds: 100> }");
     }
   }

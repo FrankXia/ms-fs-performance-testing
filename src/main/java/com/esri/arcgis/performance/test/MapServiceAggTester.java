@@ -19,7 +19,7 @@ public class MapServiceAggTester {
       singleTesting(hostName, serviceName, width, height, aggStyle, numCalls, timeoutInSeconds);
 
     } else {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.MapServiceAggTester " +
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggTester " +
           "<Host name> <Service name> <Number of calls> <Bounding box width> <Bounding box height> <Aggregation style>  {<Timeout in seconds: 60>}");
     }
   }

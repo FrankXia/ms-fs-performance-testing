@@ -9,7 +9,7 @@ public class MapServiceTester {
 
   private static void testOneService(String[] args) {
     if (args == null || args.length < 1) {
-      System.out.println("Usage: java -cp ./ms-query-api-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.datastore.test.MapServiceTester <Service Name> {<optional bounding box>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceTester <Service Name> {<optional bounding box>}");
       return;
     }
     String serviceName = args[0];
