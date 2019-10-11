@@ -33,7 +33,7 @@ public class FeatureServiceTester {
     if (args.length < 4) {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester <Services Url> <Service name> <Group By field name> <Out statistics> {<Bounding Box>}");
       System.out.println("Sample:");
-      System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa30m dest \"[" +
+      System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa30m dest \"[" +
           "{\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
           "{\\\"statisticType\\\":\\\"min\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"min_speed\\\"}," +
           "{\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"max_speed\\\"}" +
@@ -70,7 +70,7 @@ public class FeatureServiceTester {
       System.out.println("8 -> spatiotemporal extent with attribute group:  flightId IN ('1234', '5678') AND geometry INSIDE bounding box AND time > t1 and time < t2, limit=10,000 for all services ");
 
       System.out.println("Samples: ");
-      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa10m 1,2,3");
+      System.out.println("java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa10m 1,2,3");
     } else {
 
       String servicesUrl = args[0];

@@ -12,7 +12,7 @@ public class FeatureServiceWithRandomBBoxTester {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester" +
           " <Host name> <Service name> <Bounding box file name> <Number of tests> {<Timeout in seconds: 120> <Starting entry> }");
       System.out.println("Sample: ");
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester localhost faa10m  faa10m_es.txt 100");
+      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa10m  faa10m_es.txt 100");
     } else {
       String servicesUrl = args[0];
       String table = args[1];

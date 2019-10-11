@@ -22,7 +22,7 @@ public class FeatureServiceWithStatsTester {
     if (args.length < 6) {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithStatsTester <Services Url> <Service name> <Group By field name> <Number of runs> <Timeout in seconds> <Out statistics> {<Bounding Box>}");
       System.out.println("Sample:");
-      System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester localhost faa30m dest 20 120 \"[" +
+      System.out.println("   java -cp  ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa30m dest 20 120 \"[" +
           "{\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
           "{\\\"statisticType\\\":\\\"min\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"min_speed\\\"}," +
           "{\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"max_speed\\\"}" +
