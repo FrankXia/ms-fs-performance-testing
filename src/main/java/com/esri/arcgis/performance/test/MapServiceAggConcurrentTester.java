@@ -13,7 +13,7 @@ public class MapServiceAggConcurrentTester {
 
   public static void main(String[] args) {
     if (args.length >= 7) {
-      String hostName = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       int numThreads = Integer.parseInt(args[2]);
       int numCalls = Integer.parseInt(args[3]);
@@ -26,9 +26,9 @@ public class MapServiceAggConcurrentTester {
         timeoutInSeconds = Integer.parseInt(args[7]);
       }
       if (numCalls == 1) {
-        singleTesting(hostName, serviceName, width, height, aggStyle, timeoutInSeconds);
+        singleTesting(servicesUrl, serviceName, width, height, aggStyle, timeoutInSeconds);
       } else {
-        concurrentTesting(hostName, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds);
+        concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds);
       }
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggConcurrentTester " +

@@ -95,7 +95,7 @@ public class FeatureServiceTester {
     }
   }
 
-  private static void testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(String hostName, String[] tableNames, double boundingBoxWidth) {
+  private static void testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(String servicesUrl, String[] tableNames, double boundingBoxWidth) {
     System.out.println("======== get features from each service with a 10 degree random bounding box and time extent and IN parameter ========= ");
 
     String fieldName = "orig";
@@ -106,7 +106,7 @@ public class FeatureServiceTester {
 
     try {
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(hostName, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
         String mTimestamp = getTimeExtent(featureService, timeFieldName);
         String where = getUniqueValuesForIN(featureService, fieldName, isStringField);
         featureService.getFeaturesWithWhereClauseAndBoundingBoxAndTimeExtent(where, boundingBox, mTimestamp);

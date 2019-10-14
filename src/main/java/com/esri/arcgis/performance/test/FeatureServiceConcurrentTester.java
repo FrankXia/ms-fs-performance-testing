@@ -16,7 +16,7 @@ public class FeatureServiceConcurrentTester {
     double height = 90.0;
 
     if (args.length >= 6) {
-      String host = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       int numThreads = Integer.parseInt(args[2]);
       int numCalls = Integer.parseInt(args[3]);
@@ -33,7 +33,7 @@ public class FeatureServiceConcurrentTester {
         timeoutInSeconds = Integer.parseInt(args[8]);
       }
 
-      concurrentTesting(host, serviceName, numThreads, numCalls, groupByFieldName, outStatisitcs, width, height, timeoutInSeconds);
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatisitcs, width, height, timeoutInSeconds);
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceConcurrentTester <Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Group By field name> <Out Statistics> {<bounding box width (180)> <bounding box height (90)> <Timeout in seconds>}");
       System.out.println("Sample:");

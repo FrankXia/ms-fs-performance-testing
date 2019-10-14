@@ -15,7 +15,7 @@ public class MapServiceConcurrentTester {
 
   public static void main(String[] args) {
     if (args.length >= 6) {
-      String hostName = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       int numThreads = Integer.parseInt(args[2]);
       int numCalls = Integer.parseInt(args[3]);
@@ -24,7 +24,7 @@ public class MapServiceConcurrentTester {
       int timeoutInSeconds = 100;
       if (args.length > 6) timeoutInSeconds = Integer.parseInt(args[6]);
 
-      concurrentTesting(hostName, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds);
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds);
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceConcurrentTester " +
           "<Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Path to bounding box file> <Number of lines to skip> {<Timeout in seconds: 100> }");

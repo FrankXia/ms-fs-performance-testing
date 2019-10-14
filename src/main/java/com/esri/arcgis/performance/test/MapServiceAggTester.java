@@ -4,7 +4,7 @@ package com.esri.arcgis.performance.test;
 public class MapServiceAggTester {
   public static void main(String[] args) {
     if (args.length >= 6) {
-      String hostName = args[0];
+      String servicesUrl = args[0];
       String serviceName = args[1];
       int numCalls = Integer.parseInt(args[2]);
       int width = Integer.parseInt(args[3]);
@@ -16,7 +16,7 @@ public class MapServiceAggTester {
         timeoutInSeconds = Integer.parseInt(args[6]);
       }
 
-      singleTesting(hostName, serviceName, width, height, aggStyle, numCalls, timeoutInSeconds);
+      singleTesting(servicesUrl, serviceName, width, height, aggStyle, numCalls, timeoutInSeconds);
 
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggTester " +

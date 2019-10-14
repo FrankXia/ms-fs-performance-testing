@@ -21,8 +21,6 @@ public class MapService {
   private String aggregationStyle = "square";
 
   private HttpClient httpClient;
-  private String host;
-  private int port;
   private String serviceName;
   private String servicesUrl;
   private int timeoutInSeconds = 60; // seconds
@@ -111,7 +109,7 @@ public class MapService {
 
 
   Tuple getCount(String where, String boundingBox) {
-    FeatureService featureService = new FeatureService(host, serviceName, timeoutInSeconds);
+    FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
     return featureService.getCount(where, boundingBox);
   }
 
