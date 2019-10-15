@@ -10,14 +10,20 @@ public class GenerateBoundingBox {
     getBoundingBoxWith10kFeatures(args);
   }
 
+  private static double MAX_W = 360;
+  private static double MAX_H = 180;
+  private static double MIN_X = -180;
+  private static double MIN_Y = -90;
+
   private static void getBoundingBoxWith10kFeatures(String[] args) {
     if (args == null || args.length < 3) {
       System.out.println("Usage: java -cp ./ms-ms-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.GenerateBoundingBox " +
-          "<Services Url> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000>}");
+          "<Services Url> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000> <Min X,Y> <Max X,Y>}\n" +
+              "Ex: java -cp ./target/ms-fs-performance-test-1.0.jar com.esri.arcgis.performance.test.GenerateBoundingBox https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ Safegraph3 safegraph3.txt 1 30 20 100000,1000000 -125,25 65,50");
       return;
     }
-    int limitMax = 10000;
-    int limitMin = 9900;
+    int featureLimitMax = 10000;
+    int featureLimitMin = 9900;
 
     String servicesUrl = args[0];
     String name = args[1];
@@ -32,8 +38,24 @@ public class GenerateBoundingBox {
     if (args.length > 6) {
       String[] limits = args[6].split(",");
       if (limits.length == 2) {
-        limitMin = Integer.parseInt(limits[0]);
-        limitMax = Integer.parseInt(limits[1]);
+        featureLimitMin = Integer.parseInt(limits[0]);
+        featureLimitMax = Integer.parseInt(limits[1]);
+      }
+    }
+    if (args.length > 7) {
+      String[] minxy = args[7].split(",");
+      if (minxy.length == 2) {
+        MIN_X = Double.parseDouble(minxy[0]);
+        MIN_Y = Double.parseDouble(minxy[1]);
+      }
+    }
+    if (args.length > 8) {
+      String[] maxxy = args[8].split(",");
+      if (maxxy.length == 2) {
+        double maxx = Double.parseDouble(maxxy[0]);
+        if (maxx > MIN_X) MAX_W = maxx - MIN_X;
+        double maxy = Double.parseDouble(maxxy[1]);
+        if (maxy > MIN_Y) MAX_H = maxy - MIN_Y;
       }
     }
 
@@ -42,10 +64,11 @@ public class GenerateBoundingBox {
 
       int validCount = 0;
       while (validCount < numBBoxes) {
-        String boundingBox = getBbox(servicesUrl, name, limitMin, limitMax, width, height, validCount);
+        String boundingBox = getBbox(servicesUrl, name, featureLimitMin, featureLimitMax, width, height, validCount);
         writer.append(boundingBox);
         writer. newLine();
         validCount++;
+        System.out.println("Generated =============> " + validCount);
       }
 
       writer.close();
@@ -53,7 +76,6 @@ public class GenerateBoundingBox {
       ex.printStackTrace();
     }
   }
-
 
   static class MinXY {
     double minx;
@@ -64,13 +86,9 @@ public class GenerateBoundingBox {
       this.miny = miny;
     }
   }
+
   private static Random random = new Random();
   static MinXY getBbox(double width, double height) {
-    double MAX_W = 360;
-    double MAX_H = 180;
-    double MIN_X = -180;
-    double MIN_Y = -90;
-
     double randomX = random.nextDouble();
     double randomY = random.nextDouble();
     double minx = MIN_X + randomX * (MAX_W - width);
@@ -78,7 +96,7 @@ public class GenerateBoundingBox {
     return new MinXY(minx, miny);
   }
 
-  static String getBbox(String servicesUrl, String serviceName, int limitMin, int limitMax, double initWidth, double initHeight,  int count) {
+  static String getBbox(String servicesUrl, String serviceName, int featureLimitMin, int featureLimitMax, double initWidth, double initHeight,  int count) {
     String bbox;
     long numFeatures;
     while (true) {
@@ -97,12 +115,13 @@ public class GenerateBoundingBox {
       numFeatures = mapService.getCount("1=1", bbox).returnedFeatures;
       bbox = bbox + "|" + numFeatures;
 
-      int limitRange = limitMax - limitMin;
-      long delta = limitMax - numFeatures;
+//      int limitRange = featureLimitMax - featureLimitMin;
+      long delta = featureLimitMax - numFeatures;
       int loopCount = 0;
 
-      while (Math.abs(delta) > limitRange || delta < 0) {
-        double percent = (double) delta / (double) limitMax;
+//      while (Math.abs(delta) > limitRange || delta < 0) {
+      while  (numFeatures < featureLimitMin || numFeatures > featureLimitMax) {
+        double percent = (double) delta / (double) featureLimitMax;
         System.out.println("# of features: " + numFeatures + ", delta: " + delta + ", loop count: " + loopCount + ", percentage: " + percent + ", bbox: " + bbox);
         if (Math.abs(percent) >= 1) {
           percent = percent > 0 ? 1/2.0 : -1/2.0;
@@ -119,7 +138,7 @@ public class GenerateBoundingBox {
         maxy = (miny + height) % 90.0;
         bbox = minx + "," + miny + "," + maxx + "," + maxy;
         numFeatures = mapService.getCount("1=1", bbox).returnedFeatures;
-        delta = limitMax - numFeatures;
+        delta = featureLimitMax - numFeatures;
         bbox = bbox  + "|" + numFeatures;
 
         if (loopCount > 50) {
