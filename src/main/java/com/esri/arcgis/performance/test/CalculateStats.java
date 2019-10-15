@@ -11,10 +11,10 @@ public class CalculateStats {
   public static void main(String[] args) {
 
     if (args.length < 3) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats <File name> <Number of concurrent requests> <Prefix> {<Datastore request multiples>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats <File name> <Number of concurrent requests> <Prefix> {<Datastore request multiples>}");
       System.out.println("Sample: ");
-      System.out.println("  java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats z100 100 \"Solr request time: \"");
-      System.out.println("  java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats z100 100 \"Elastic query time: \" 2");
+      System.out.println("  java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats z100 100 \"Solr request time: \"");
+      System.out.println("  java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.CalculateStats z100 100 \"Elastic query time: \" 2");
     } else  {
       String fileName = args[0];
       int numRequests = Integer.parseInt(args[1]);

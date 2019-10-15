@@ -1,8 +1,16 @@
 package com.esri.arcgis.performance.test;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+
 import java.net.URLEncoder;
 
 public class MapService {
@@ -20,7 +28,7 @@ public class MapService {
   private int featureLimit = 10000;
   private String aggregationStyle = "square";
 
-  private HttpClient httpClient;
+  private CloseableHttpClient httpClient;
   private String serviceName;
   private String servicesUrl;
   private int timeoutInSeconds = 60; // seconds
@@ -29,15 +37,30 @@ public class MapService {
     this.servicesUrl = servicesUrl.endsWith("/")? servicesUrl : servicesUrl + "/";
     this.serviceName = serviceName;
 
-    RequestConfig.Builder requestBuilder = RequestConfig.custom();
-    requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
-    requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
-    requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
+    String userName = System.getenv("A4IOT_USER");
+    String password = System.getenv("A4IOT_PASSWORD");
+    if(userName != null && password != null) {
+      CredentialsProvider provider = new BasicCredentialsProvider();
+      UsernamePasswordCredentials credentials
+              = new UsernamePasswordCredentials(userName, password);
+      provider.setCredentials(AuthScope.ANY, credentials);
+      RequestConfig.Builder requestBuilder = RequestConfig.custom();
+      requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
+      requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
+      requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
 
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setDefaultRequestConfig(requestBuilder.build());
-//    builder.disableAutomaticRetries();
-    httpClient = builder.build();
+//    HttpClientBuilder builder = HttpClientBuilder.create();
+//    builder.setDefaultRequestConfig(requestBuilder.build());
+////    builder.disableAutomaticRetries();
+//    httpClient = builder.build();
+
+      PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+      httpClient = HttpClients.custom()
+              .setDefaultCredentialsProvider(provider)
+              .setDefaultRequestConfig(requestBuilder.build())
+              .setConnectionManager(connectionManager)
+              .build();
+    }
 
     this.timeoutInSeconds = timeoutInSeconds;
   }

@@ -9,10 +9,10 @@ public class FeatureServiceWithRandomBBoxTester {
 
   public static void main(String[] args) throws IOException {
     if (args.length < 4) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester" +
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester" +
           " <Services Url> <Service name> <Bounding box file name> <Number of tests> {<Timeout in seconds: 120> <Starting entry> }");
       System.out.println("Sample: ");
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa10m  faa10m_es.txt 100");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.FeatureServiceWithRandomBBoxTester https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ Safegraph3 ./safegraph.txt 100");
     } else {
       String servicesUrl = args[0];
       String table = args[1];

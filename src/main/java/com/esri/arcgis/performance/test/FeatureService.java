@@ -6,7 +6,10 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -17,7 +20,7 @@ public class FeatureService {
 
   private Random random = new Random();
 
-  private HttpClient httpClient = HttpClientBuilder.create().build();
+  private CloseableHttpClient httpClient = null;
   private String serviceName;
   private String servicesUrl;
   private String keyspace = "esri_ds_data";
@@ -81,11 +84,18 @@ public class FeatureService {
               = new UsernamePasswordCredentials(userName, password);
       provider.setCredentials(AuthScope.ANY, credentials);
 
-      HttpClientBuilder builder = HttpClientBuilder.create();
-      builder.setDefaultCredentialsProvider(provider);
-      builder.setDefaultRequestConfig(requestBuilder.build());
-//    builder.disableAutomaticRetries();
-      httpClient = builder.build();
+//      HttpClientBuilder builder = HttpClientBuilder.create();
+//      builder.setDefaultCredentialsProvider(provider);
+//      builder.setDefaultRequestConfig(requestBuilder.build());
+////    builder.disableAutomaticRetries();
+//      httpClient = builder.build();
+
+      PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+      httpClient = HttpClients.custom()
+              .setDefaultCredentialsProvider(provider)
+              .setDefaultRequestConfig(requestBuilder.build())
+              .setConnectionManager(connectionManager)
+              .build();
     } else {
       System.out.println("ERROR: You must set 2 environment variables: A4IOT_USER and A4IOT_PASSWORD from accessing your A4IoT services. ");
       System.out.println("       If your password contains some special characters, you need to add single quote in the beginning and the end of your password.");
@@ -309,7 +319,8 @@ public class FeatureService {
   }
 
   private String executeRequest(String queryParameters) {
-    HttpClient client = httpClient;
+    CloseableHttpClient client =  httpClient;
+    //HttpClientBuilder.create().build();
     try {
       String url = servicesUrl + serviceName + "/FeatureServer/0/query?" + queryParameters;
       System.out.println(url);

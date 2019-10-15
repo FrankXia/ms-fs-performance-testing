@@ -9,14 +9,14 @@ public class MapServiceTester {
 
   private static void testOneService(String[] args) {
     if (args == null || args.length < 2) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceTester <Service Url> <Service Name> {<optional bounding box>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceTester <Service Url> <Service Name> {<optional bounding box>}");
       return;
     }
     String servicesUrl = args[0];
     String serviceName = args[1];
     int limitMax = 10000;
     int limitMin = 9000;
-    String boundingBox = args.length == 2 ? args [1] : GenerateBoundingBox.getBbox(servicesUrl, serviceName, limitMin, limitMax, 180, 90, 1).split("[|]")[0];
+    String boundingBox = args.length == 3 ? args [2] : GenerateBoundingBox.getBbox(servicesUrl, serviceName, limitMin, limitMax, 180, 90, 1).split("[|]")[0];
     testExportMap(servicesUrl, serviceName, boundingBox);
   }
 
