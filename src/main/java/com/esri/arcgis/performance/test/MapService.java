@@ -26,16 +26,17 @@ public class MapService {
   private String dynamicLayers = "";
 
   private int featureLimit = 10000;
-  private String aggregationStyle = "square";
+  private String aggregationStyle = "pointyHexagon";
 
   private CloseableHttpClient httpClient;
   private String serviceName;
   private String servicesUrl;
   private int timeoutInSeconds = 60; // seconds
 
-  public MapService(String servicesUrl, String serviceName, int timeoutInSeconds) {
+  public MapService(String servicesUrl, String serviceName, int timeoutInSeconds, String aggregationStyle) {
     this.servicesUrl = servicesUrl.endsWith("/")? servicesUrl : servicesUrl + "/";
     this.serviceName = serviceName;
+    this.aggregationStyle = aggregationStyle;
 
     String userName = System.getenv("A4IOT_USER");
     String password = System.getenv("A4IOT_PASSWORD");
@@ -120,7 +121,7 @@ public class MapService {
     String template = "[{\"id\":0,\"name\":\"" + layerName + "\",\"source\":{\"type\":\"mapLayer\",\"mapLayerId\":0},\"drawingInfo\":" +
         "{\"renderer\":{\"type\":\"aggregation\",\"style\":\"Grid\",\"featureThreshold\":" + featureLimit +
         ",\"lodOffset\":0,\"minBinSizeInPixels\":25,\"fullLodGrid\":false,\"labels\":" +
-        "{\"color\":[0,0,0,255],\"font\":\".SF NS Text\",\"size\":12,\"style\":\"PLAIN\",\"format\":\"###.#KMB\"},\"fieldStatistic\":null," +
+        "{\"color\":[0,0,0,255],\"font\":\"Arial\",\"size\":12,\"style\":\"PLAIN\",\"format\":\"###.#KMB\"},\"fieldStatistic\":null," +
         "\"binRenderer\":{\"type\":\"Continuous\",\"minColor\":[255,0,0,0],\"maxColor\":[255,0,0,255],\"minOutlineColor\":[0,0,0,100]," +
         "\"maxOutlineColor\":[0,0,0,100],\"minOutlineWidth\":0.5,\"maxOutlineWidth\":0.5,\"minValue\":null,\"maxValue\":null,\"minSize\":100,\"maxSize\":100,\"normalizeByBinArea\":false}," +
         "\"geoHashStyle\":{\"style\":\"" + aggregationStyle + "\"," +

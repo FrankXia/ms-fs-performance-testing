@@ -111,7 +111,7 @@ public class GenerateBoundingBox {
       double height = maxy - miny;
 
       bbox = minx +"," + miny + "," +maxx+","+maxy;
-      MapService mapService = new MapService(servicesUrl, serviceName, 100);
+      MapService mapService = new MapService(servicesUrl, serviceName, 100, "square");
       numFeatures = mapService.getCount("1=1", bbox).returnedFeatures;
       bbox = bbox + "|" + numFeatures;
 

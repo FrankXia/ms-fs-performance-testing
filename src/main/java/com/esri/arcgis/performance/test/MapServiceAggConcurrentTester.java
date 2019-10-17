@@ -25,33 +25,38 @@ public class MapServiceAggConcurrentTester {
       if (args.length > 7) {
         timeoutInSeconds = Integer.parseInt(args[7]);
       }
+      String aggregationStyle = "square";
+      if (args.length > 8) {
+        aggregationStyle = args[7];
+      }
+
       if (numCalls == 1) {
-        singleTesting(servicesUrl, serviceName, width, height, aggStyle, timeoutInSeconds);
+        singleTesting(servicesUrl, serviceName, width, height, aggStyle, timeoutInSeconds, aggregationStyle);
       } else {
-        concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds);
+        concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds, aggregationStyle);
       }
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceAggConcurrentTester " +
-          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Bounding box width> <Bounding box height> <Aggregation style> {<Timeout in seconds: 60>}");
+          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Bounding box width> <Bounding box height> <Aggregation style (square/pointyHexagon)> {<Timeout in seconds: 60>}");
     }
   }
 
-  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds) {
+  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds, String aggregationStyle) {
     String boundingBox = Utils.getRandomBoundingBox(width, height);
-    MapService mapService = new MapService(servicesUrl, serviceName,timeoutInSeconds);
+    MapService mapService = new MapService(servicesUrl, serviceName,timeoutInSeconds, aggregationStyle);
     long time = mapService.exportMap(boundingBox, 4326, aggStyle);
     System.out.println( "Time -> " + time);
   }
 
-  private static Callable<Long> createTask(String servicesUrl, String serviceName, String boundingBox, String aggStyle, int timeoutInSeconds) {
+  private static Callable<Long> createTask(String servicesUrl, String serviceName, String boundingBox, String aggStyle, int timeoutInSeconds, String aggregationStyle) {
     Callable<Long> task = () -> {
-      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds);
+      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle);
       return mapService.exportMap(boundingBox, 4326, aggStyle);
     };
     return task;
   }
 
-  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, int width, int height, String aggStyle, int timeoutInSeconds) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, int width, int height, String aggStyle, int timeoutInSeconds, String aggregationStyle) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
     DecimalFormat df = new DecimalFormat("#.#");
@@ -66,7 +71,7 @@ public class MapServiceAggConcurrentTester {
       int lineRead = 0;
       while (lineRead < numbConcurrentCalls) {
         String boundingBox = Utils.getRandomBoundingBox(width, height);
-        callables.add(createTask(servicesUrl, serviceName, boundingBox, aggStyle, timeoutInSeconds));
+        callables.add(createTask(servicesUrl, serviceName, boundingBox, aggStyle, timeoutInSeconds, aggregationStyle));
         lineRead++;
       }
 

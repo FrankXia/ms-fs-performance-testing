@@ -9,19 +9,24 @@ public class MapServiceTester {
 
   private static void testOneService(String[] args) {
     if (args == null || args.length < 2) {
-      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceTester <Service Url> <Service Name> {<optional bounding box>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceTester <Service Url> <Service Name> {<Aggregation Style (square/pointyHexagon)> <optional bounding box>}");
       return;
     }
     String servicesUrl = args[0];
     String serviceName = args[1];
-    int limitMax = 10000;
-    int limitMin = 9000;
+    String aggregationStyle = "square";
+    if (args.length > 2) {
+      aggregationStyle = args[2];
+    }
+
+    int limitMax = 5000000;
+    int limitMin = 2000000;
     String boundingBox = args.length == 3 ? args [2] : GenerateBoundingBox.getBbox(servicesUrl, serviceName, limitMin, limitMax, 180, 90, 1).split("[|]")[0];
-    testExportMap(servicesUrl, serviceName, boundingBox);
+    testExportMap(servicesUrl, serviceName, boundingBox, aggregationStyle);
   }
 
-  private static void testExportMap(String servicesUrl, String serviceName, String boundingBox) {
-    MapService mapService = new MapService(servicesUrl, serviceName, 100);
+  private static void testExportMap(String servicesUrl, String serviceName, String boundingBox, String aggregationStyle) {
+    MapService mapService = new MapService(servicesUrl, serviceName, 100, aggregationStyle);
     mapService.exportMap(boundingBox, 4326);
   }
 
@@ -42,7 +47,7 @@ public class MapServiceTester {
 
     for (int index =0; index < serviceNames.length; index++) {
       String name = serviceNames[index];
-      MapService mapService = new MapService(servicesUrl, name, 100);
+      MapService mapService = new MapService(servicesUrl, name, 100, "square");
       mapService.exportMap(bboxes[index], 4326);
     }
   }

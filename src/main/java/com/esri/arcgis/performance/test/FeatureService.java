@@ -126,12 +126,18 @@ public class FeatureService {
     String response = executeRequest(queryParameters);
     if (response != null) {
       System.out.println(response);
-      JSONObject obj = new JSONObject(response);
-      if (obj.optJSONObject("error") == null) {
-        totalCount = obj.getLong("count");
+      if (response.trim().startsWith("{")) {
+        JSONObject obj = new JSONObject(response);
+        if (obj.optJSONObject("error") == null) {
+          totalCount = obj.getLong("count");
+        } else {
+          System.out.print("Request getCount failed -> " + response);
+        }
       } else {
-        System.out.print("Request failed -> " + response);
+        System.out.println("Error: getCount ==> " + response);
       }
+    } else {
+      System.out.println("Error: getCount ==> response is null.");
     }
     return new Tuple(System.currentTimeMillis() - start, totalCount);
   }
@@ -204,33 +210,39 @@ public class FeatureService {
     long numFeatures = 0;
     if (response != null) {
       //System.out.println(response);
-      JSONObject obj = new JSONObject(response);
-      if (obj.optJSONObject("error") == null) {
-        boolean exceededTransferLimit = obj.optBoolean("exceededTransferLimit");
-        JSONArray features = null;
-        JSONObject spaceTimeFeatures = null;
-        if (isSpaceTime) {
-          spaceTimeFeatures =  obj.getJSONObject("spaceTimeFeatures");
-          if (spaceTimeFeatures != null) {
-            Map<String, Object> stFeatures = spaceTimeFeatures.toMap();
-            for (String key : stFeatures.keySet()) {
-              System.out.println(key + " -> " + stFeatures.get(key));
+      if (response.trim().startsWith("{")) {
+        JSONObject obj = new JSONObject(response);
+        if (obj.optJSONObject("error") == null) {
+          boolean exceededTransferLimit = obj.optBoolean("exceededTransferLimit");
+          JSONArray features = null;
+          JSONObject spaceTimeFeatures = null;
+          if (isSpaceTime) {
+            spaceTimeFeatures = obj.getJSONObject("spaceTimeFeatures");
+            if (spaceTimeFeatures != null) {
+              Map<String, Object> stFeatures = spaceTimeFeatures.toMap();
+              for (String key : stFeatures.keySet()) {
+                System.out.println(key + " -> " + stFeatures.get(key));
+              }
             }
+          } else {
+            features = obj.getJSONArray("features");
+            if (features.length() > 0) {
+              // print a random feature
+              int index = random.nextInt() % features.length();
+              index = index < 0 ? (-1) * index : index;
+              System.out.println(features.get(index));
+            }
+            numFeatures = features.length();
+            System.out.println("# of features returned: " + features.length() + ", exceededTransferLimit: " + exceededTransferLimit + ", offset: " + this.resultOffset);
           }
         } else {
-          features = obj.getJSONArray("features");
-          if (features.length() > 0) {
-            // print a random feature
-            int index = random.nextInt() % features.length();
-            index = index < 0 ? (-1) * index : index;
-            System.out.println(features.get(index));
-          }
-          numFeatures = features.length();
-          System.out.println("# of features returned: " + features.length() + ", exceededTransferLimit: " + exceededTransferLimit + ", offset: " + this.resultOffset);
+          System.out.print("Request getFeatures failed -> " + response);
         }
       } else {
-        System.out.print("Request failed -> " + response);
+        System.out.println("Error: getFeatures ==> " + response);
       }
+    } else {
+      System.out.println("Error: getFeatures ==> response is null.");
     }
     return new Tuple(System.currentTimeMillis() - start, numFeatures);
   }

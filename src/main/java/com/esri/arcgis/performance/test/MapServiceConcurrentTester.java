@@ -22,24 +22,29 @@ public class MapServiceConcurrentTester {
       String fileName = args[4];
       int lines2Skip = Integer.parseInt(args[5]);
       int timeoutInSeconds = 100;
-      if (args.length > 6) timeoutInSeconds = Integer.parseInt(args[6]);
+      if (args.length > 7) timeoutInSeconds = Integer.parseInt(args[6]);
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds);
+      String aggregationStyle = "square";
+      if (args.length > 8) {
+        aggregationStyle = args[7];
+      }
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds, aggregationStyle);
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.MapServiceConcurrentTester " +
-          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Path to bounding box file> <Number of lines to skip> {<Timeout in seconds: 100> }");
+          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Path to bounding box file> <Number of lines to skip> {<Timeout in seconds: 100> <Aggregation Style (square/pointyHexagon/flatTriangle> }");
     }
   }
 
-  private static Callable<Long> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds) {
+  private static Callable<Long> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, String aggregationStyle) {
     Callable<Long> task = () -> {
-      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds);
+      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle);
       return mapService.exportMap(boundingBox, 4326);
     };
     return task;
   }
 
-  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, String bboxFile, int lines2Skip, int timeoutInSeconds) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls,
+                                        String bboxFile, int lines2Skip, int timeoutInSeconds, String aggregationStyle) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
     int port = 9000;
@@ -62,7 +67,7 @@ public class MapServiceConcurrentTester {
       int lineRead = 0;
       while (line != null && lineRead < numbConcurrentCalls) {
         String boundingBox = line.split("[|]")[0];
-        callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds));
+        callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, aggregationStyle));
         lineRead++;
         line = reader.readLine();
       }
