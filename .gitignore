@@ -4,6 +4,7 @@
 target/
 *.cache
 *.versionsBackup
+docs/
 
 # Eclipse
 .project
@@ -32,37 +33,8 @@ local.properties
 .#*
 \#*\#
 
-# Version.java
-Version.java
-
-# Zelix obfuscation
-Z_log.txt
-t
-*.fbl7
-
-# Visual Studio
-*.suo
-*.sln.docstates
-*.csproj.user
-obj/
-bin/
-
-# Merge artifacts
-*.orig
-
-# Passolo projects files
-*.lpu
-
-# Passolo option files
-*.pslopt
-
-# js code assist
-*.sdocml
 
 # Binary files
 *.gz
-
-# Misc text files
-*.stackdump
 
 *.log

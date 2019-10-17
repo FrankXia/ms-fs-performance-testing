@@ -102,7 +102,7 @@ public class MapService {
 
     long start = System.currentTimeMillis();
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    long response = Utils.executeHttpGETRequest(httpClient,url, serviceName);
+    long response = Utils.executeHttpGETRequest(httpClient, url, serviceName);
 
     // System.out.println(queryParameters.toString());
     // String url = "http://" + host + ":" + port + "/arcgis/rest/services/" + serviceName + "/MapServer/export?";
@@ -111,7 +111,7 @@ public class MapService {
 
     if (response == -1) {
       System.out.println("?????? failed to export image! " + (System.currentTimeMillis() - start) + " ms");
-      return (System.currentTimeMillis() - start);
+      //return (System.currentTimeMillis() - start);
     }
     System.out.println("Export image succeeded!");
     return response;

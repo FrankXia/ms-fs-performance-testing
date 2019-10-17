@@ -121,6 +121,7 @@ public class FeatureService {
   Tuple getCount() {
     this.returnCountOnly = true;
     long totalCount = 0L;
+    int errorCode = 0;
     long start = System.currentTimeMillis();
     String queryParameters = composeGetRequestQueryParameters();
     String response = executeRequest(queryParameters);
@@ -131,15 +132,18 @@ public class FeatureService {
         if (obj.optJSONObject("error") == null) {
           totalCount = obj.getLong("count");
         } else {
+          errorCode = 3;
           System.out.print("Request getCount failed -> " + response);
         }
       } else {
+        errorCode = 2;
         System.out.println("Error: getCount ==> " + response);
       }
     } else {
+      errorCode = 1;
       System.out.println("Error: getCount ==> response is null.");
     }
-    return new Tuple(System.currentTimeMillis() - start, totalCount);
+    return new Tuple(System.currentTimeMillis() - start, totalCount, errorCode);
   }
 
   Tuple getFeaturesWithWhereClauseAndBoundingBoxAndTimeExtent(String where, String boundingBox, String timeExtent) {
@@ -208,6 +212,7 @@ public class FeatureService {
     String queryParameters = composeGetRequestQueryParameters();
     String response = executeRequest(queryParameters);
     long numFeatures = 0;
+    int errorCode = 0;
     if (response != null) {
       //System.out.println(response);
       if (response.trim().startsWith("{")) {
@@ -236,15 +241,18 @@ public class FeatureService {
             System.out.println("# of features returned: " + features.length() + ", exceededTransferLimit: " + exceededTransferLimit + ", offset: " + this.resultOffset);
           }
         } else {
+          errorCode = 3;
           System.out.print("Request getFeatures failed -> " + response);
         }
       } else {
+        errorCode = 2;
         System.out.println("Error: getFeatures ==> " + response);
       }
     } else {
+      errorCode = 1;
       System.out.println("Error: getFeatures ==> response is null.");
     }
-    return new Tuple(System.currentTimeMillis() - start, numFeatures);
+    return new Tuple(System.currentTimeMillis() - start, numFeatures, errorCode);
   }
 
   private String composeGetRequestQueryParameters() {

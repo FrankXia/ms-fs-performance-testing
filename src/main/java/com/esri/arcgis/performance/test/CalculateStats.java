@@ -88,19 +88,25 @@ public class CalculateStats {
     double max = Double.MIN_VALUE;
     DecimalFormat df = new DecimalFormat("#.#");
 
+    int failedRequests = 0;
     double squaredValue = 0.0;
     for (int i=(data.length - 1); i >= (data.length - numberRequest); i--) {
       double stat = data[i];
-      sum += stat;
-      if (stat < min) min = stat;
-      if (stat > max) max = stat;
-      squaredValue += stat * stat;
+      if (stat > 0) {
+        sum += stat;
+        if (stat < min) min = stat;
+        if (stat > max) max = stat;
+        squaredValue += stat * stat;
+      } else {
+        failedRequests++;
+      }
     }
 
-    double avg = sum / numberRequest;
-    double std_dev = Math.sqrt( (squaredValue - numberRequest * avg * avg) / (numberRequest - 1) );
+    int validRequests = (numberRequest - failedRequests);
+    double avg = sum /validRequests;
+    double std_dev = Math.sqrt( (squaredValue - validRequests * avg * avg) / (validRequests - 1) );
 
-    System.out.println("Total data points: " + numberRequest);
+    System.out.println("Total data points: " + numberRequest + ", valid count: " + validRequests);
     System.out.println("Average, min, max and std_dev: | " + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |");
   }
 
