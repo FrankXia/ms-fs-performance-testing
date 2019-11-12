@@ -38,3 +38,17 @@ local.properties
 *.gz
 
 *.log
+/docs_es_home-1104d/*
+/docs_es_office-1104d/*
+/docs_kube1/*
+/docs_local/*
+/docs_localmat/*
+/docs_mat_in_sst_pod/*
+/docs_mat_kube1a/*
+/docs_mat_kube2a/*
+/docs_mat_kube2b/*
+/docs_mat_one2one/*
+/docs_mat_standalone/*
+/docs_mat_standalone1/*
+/curl_standard_out/*
+/docs_mat_kube1/*
