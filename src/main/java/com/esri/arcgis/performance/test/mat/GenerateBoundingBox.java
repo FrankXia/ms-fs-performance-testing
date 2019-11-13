@@ -98,6 +98,8 @@ public class GenerateBoundingBox {
   static String getBbox(String servicesUrl, String serviceName, int featureLimitMin, int featureLimitMax, double initWidth, double initHeight,  int count) {
     String bbox;
     long numFeatures;
+    long lastFeatureCount = 0;
+
     while (true) {
       MinXY minXY = getBbox(initWidth, initHeight);
       double minx = minXY.minx;
@@ -118,7 +120,6 @@ public class GenerateBoundingBox {
       long delta = featureLimitMax - numFeatures;
       int loopCount = 0;
 
-//      while (Math.abs(delta) > limitRange || delta < 0) {
       while  (numFeatures < featureLimitMin || numFeatures > featureLimitMax) {
         double percent = (double) delta / (double) featureLimitMax;
         System.out.println("# of features: " + numFeatures + ", delta: " + delta + ", loop count: " + loopCount + ", percentage: " + percent + ", bbox: " + bbox);
@@ -146,10 +147,12 @@ public class GenerateBoundingBox {
         delta = featureLimitMax - numFeatures;
         bbox = bbox  + "|" + numFeatures;
 
-        if (loopCount > 50) {
+        if (loopCount > 50 || numFeatures == 0 || lastFeatureCount == numFeatures) {
           bbox = null;
+          lastFeatureCount = 0;
           break;
         }
+        lastFeatureCount = numFeatures;
       }
       if (bbox != null) break;
     }
