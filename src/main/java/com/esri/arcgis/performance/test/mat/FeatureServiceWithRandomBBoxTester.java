@@ -29,7 +29,7 @@ public class FeatureServiceWithRandomBBoxTester {
   private static void testGetFeaturesWithBoundingBox(String servicesUrl, String tableName, String boundingBoxFileName,
                                                      int numbTests, int timeoutInSeconds, int startingEntry) throws Exception {
     System.out.println("======== get features from each service with a random bounding box that contains less than 10k features ========= bbox file => " + boundingBoxFileName + ", # of tests => " + numbTests + ", timeout => " + timeoutInSeconds);
-    FeatureService featureService = new FeatureService(servicesUrl, tableName, timeoutInSeconds);
+    FeatureService featureService = new FeatureService(servicesUrl, tableName, timeoutInSeconds, true);
     BufferedReader reader = new BufferedReader(new FileReader(boundingBoxFileName));
     int modNumber = (numbTests < 150) ? 100 : (250 - numbTests);
     int startIndex = (int) (new Random().nextDouble() * modNumber);

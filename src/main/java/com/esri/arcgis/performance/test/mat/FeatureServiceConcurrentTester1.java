@@ -57,7 +57,7 @@ public class FeatureServiceConcurrentTester1 {
 
   private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String groupByFieldName, String outStatistics, String boundingBox, int timeoutInSeconds) {
     Callable<Tuple> task = () -> {
-      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
       if (groupByFieldName != null & outStatistics != null) {
         return featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
       } else {

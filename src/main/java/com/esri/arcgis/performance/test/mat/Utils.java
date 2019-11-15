@@ -39,7 +39,7 @@ public class Utils {
 
   static String executeHttpGET(CloseableHttpClient client, String url, boolean closeClient, String cookie) throws Exception {
     HttpGet request = new HttpGet(url);
-    request.setHeader("Cookie", cookie);
+    if (cookie != null) request.setHeader("Cookie", cookie);
 
     CloseableHttpResponse response = client.execute(request);
     int responseCode = response.getStatusLine().getStatusCode();

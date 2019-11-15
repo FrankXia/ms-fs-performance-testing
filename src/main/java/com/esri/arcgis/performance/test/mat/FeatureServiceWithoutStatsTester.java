@@ -170,7 +170,7 @@ public class FeatureServiceWithoutStatsTester {
     try {
       Double[] stats = new Double[numRuns];
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
         String mTimestamp = getTimeExtent(featureService, timeStampFieldName, random);
         List<String> uniqueValues = featureService.getFieldUniqueValues(uniqueFieldName);
         for (int i=0; i<numRuns; i++) {
@@ -194,7 +194,7 @@ public class FeatureServiceWithoutStatsTester {
     try {
       Double[] stats = new Double[numRuns];
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
         String mTimestamp = getTimeExtent(featureService, timeStampFieldName, random);
         List<String> uniqueValues = featureService.getFieldUniqueValues(uniqueFieldName);
 
@@ -218,7 +218,7 @@ public class FeatureServiceWithoutStatsTester {
     try {
       Double[] stats = new Double[numRuns];
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
         String mTimestamp = getTimeExtent(featureService, timeStampFieldName, random);
         for (int i=0; i<numRuns; i++) {
 
@@ -238,7 +238,7 @@ public class FeatureServiceWithoutStatsTester {
       Double[] stats = new Double[numRuns];
 
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
         List<String> uniqueValues = featureService.getFieldUniqueValues(uniqueFieldName);
 
 
@@ -263,7 +263,7 @@ public class FeatureServiceWithoutStatsTester {
     try {
       Double[] stats = new Double[numRuns];
       for (String table : tableNames) {
-        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
         String mTimestamp = getTimeExtent(featureService, timeStampFieldName, random);
         for (int i=0; i<numRuns; i++) {
 
@@ -287,7 +287,7 @@ public class FeatureServiceWithoutStatsTester {
     Double[] stats = new Double[numRuns];
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       for (int i=0; i<numRuns; i++) {
 
         Tuple tuple = featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, false);
@@ -301,7 +301,7 @@ public class FeatureServiceWithoutStatsTester {
     System.out.println("======== get features from each service with a random offset ========= ");
     Double[] stats = new Double[numRuns];
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       boolean useOffset =  !table.contains("10k");
       for (int i=0; i<numRuns; i++) {
 
@@ -316,7 +316,7 @@ public class FeatureServiceWithoutStatsTester {
     System.out.println("======== get total count for each service ========= ");
     Double[] stats = new Double[numRuns];
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       for (int i=0; i<numRuns; i++) {
         Tuple tuple = featureService.getCount("1=1");
         stats[i] = tuple.requestTime * 1.0;
@@ -330,7 +330,7 @@ public class FeatureServiceWithoutStatsTester {
 
     Double[] runStats = new Double[numRuns];
     for (String table: tableNames) {
-      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds);
+      FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       JSONObject stats = featureService.getFieldStats(fieldName);
       double min = stats.getDouble("min");
       double max = stats.getDouble("max");

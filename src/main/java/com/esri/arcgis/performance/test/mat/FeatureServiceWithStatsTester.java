@@ -48,7 +48,7 @@ public class FeatureServiceWithStatsTester {
           double width = Double.parseDouble(args[6]);
           boundingBox = Utils.getRandomBoundingBox(width, width);
         }
-        FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
+        FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, false);
         Tuple tuple = featureService.doGroupByStats("1=1", groupbyFdName, outStats, boundingBox, false);
         stats[i] = tuple.requestTime * 1.0;
       }

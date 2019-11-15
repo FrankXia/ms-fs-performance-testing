@@ -1,7 +1,9 @@
 package com.esri.arcgis.performance.test.mat;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,40 +23,53 @@ public class FeatureServiceConcurrentTester2 {
       String serviceName = args[1];
       int numThreads = Integer.parseInt(args[2]);
       int numCalls = Integer.parseInt(args[3]);
-      String groupByFieldName = args[4];
-      String outStatistics = args[5];
-      String boundingBoxFileName = args[6];
-      int numSkips = 0;
-      if (args.length >= 8) {
-        numSkips = Integer.parseInt(args[1]);
-      }
+      String boundingBoxFileName = args[4];
+      int numSkips = Integer.parseInt(args[5]);
+
+      String outputFileName = args[6];
+
       int timeoutInSeconds = 60;
-      if (args.length >= 9) {
-        timeoutInSeconds = Integer.parseInt(args[8]);
+      if (args.length >= 8) {
+        timeoutInSeconds = Integer.parseInt(args[7]);
       }
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds);
+      String groupByFieldName = null;
+      String outStatistics = null;
+      if (args.length >= 10) {
+        groupByFieldName = args[8];
+        outStatistics = args[9];
+      }
+
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName);
     } else {
-      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester2 <Services Url> <Service name> <Number of threads> <Number of concurrent calls (<=100)> <Group By field name> <Out Statistics> <Path to bounding box file> {<Number of lines to skip> <Timeout in seconds>}");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 <Services_Url> <Service_Name> <Number_Of_Threads> <Number_Of_Concurrent_Calls> <Path to bounding box file> <Number of lines to skip>  <Output File Name> " +
+              "{ <Timeout in seconds> <Group By field name> <Out Statistics>}");
       System.out.println("Sample:");
-      System.out.println("   java -cp  ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester https://us-iotdev.arcgis.com/fx1010d/maps/arcgis/rest/services/ faa30m 4 4 dest  \"[" +
-          " {\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"avg_speed\\\"}," +
-          " {\\\"statisticType\\\":\\\"min\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"min_speed\\\"}," +
-          " {\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"speed\\\",\\\"outStatisticFieldName\\\":\\\"max_speed\\\"} " +
-          "]\" ./safegraph3.txt");
+      System.out.println("   java -cp  ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ " +
+              "Safegraph3 5 50 ./docs/safegraph3.txt 0 ./docs/output3_5_50.txt device_id  \"[" +
+              " {\\\"statisticType\\\":\\\"avg\\\",\\\"onStatisticField\\\":\\\"accuracy\\\",\\\"outStatisticFieldName\\\":\\\"avg_accuracy\\\"}," +
+              " {\\\"statisticType\\\":\\\"min\\\",\\\"onStatisticField\\\":\\\"accuracy\\\",\\\"outStatisticFieldName\\\":\\\"min_accuracy\\\"}," +
+              " {\\\"statisticType\\\":\\\"max\\\",\\\"onStatisticField\\\":\\\"accuracy\\\",\\\"outStatisticFieldName\\\":\\\"max_accuracy\\\"} " +
+              "]\"");
 
     }
   }
 
   private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String groupByFieldName, String outStatistics, String boundingBox, int timeoutInSeconds) {
     Callable<Tuple> task = () -> {
-      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
-      return featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
+      FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, false);
+      if (groupByFieldName != null & outStatistics != null) {
+        return featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
+      } else {
+        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
+      }
     };
     return task;
   }
 
-  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, String groupByFieldName, String outStatistics, String boundingBoxFileName, int numSkips, int timeoutInSeconds) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, String groupByFieldName,
+                                        String outStatistics, String boundingBoxFileName, int numSkips, int timeoutInSeconds, String outputFileName) {
+
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
     DecimalFormat df = new DecimalFormat("#.#");
@@ -94,43 +109,26 @@ public class FeatureServiceConcurrentTester2 {
                 }
               });
 
-      final List<Long> times = new LinkedList<>();
-      final List<Long> features = new LinkedList<>();
-      results.forEach( tuple -> {
-        times.add(tuple.requestTime);
-        features.add(tuple.returnedFeatures);
-      });
-
-      double timeTotal = 0;
-      double featureTotal = 0;
-      long minTime = times.get(0);
-      long maxTime = times.get(0);
-      long minFeatures = features.get(0);
-      long maxFeatures = features.get(0);
-
-      double squaredTimes = 0.0;
-      double squaredFeatures = 0.0;
-
-      for (int i=0; i<times.size(); i++) {
-        timeTotal += times.get(i);
-        featureTotal += features.get(i);
-        if (times.get(i) < minTime) minTime = times.get(i);
-        if (times.get(i) > maxTime) maxTime = times.get(i);
-        if (features.get(i) < minFeatures) minFeatures = features.get(i);
-        if (features.get(i) > maxFeatures) maxFeatures = features.get(i);
-
-        squaredTimes += times.get(i) * times.get(i);
-        squaredFeatures += features.get(i) * features.get(i);
+      // output stats
+      if (outputFileName != null) {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
+        writer.write("RequestTime, Features, ErrorCode");
+        writer.newLine();
+        results.forEach(
+                tuple -> {
+                  try {
+                    writer.write(tuple.requestTime + "," + tuple.returnedFeatures + "," + tuple.errorCode);
+                    writer.newLine();
+                  } catch (Exception ex) {
+                    ex.printStackTrace();
+                  }
+                });
+        writer.close();
+      } else {
+        // or calculate on the fly
+        calculateStats(results, numbConcurrentCalls);
       }
-//      long totalFinal = results.reduce(0L, (total, i) -> total + i);
-//      System.out.println( (double)totalFinal / (double)callables.size());
 
-      double avgTime = timeTotal / times.size();
-      double avgFeatures = featureTotal / features.size();
-      double stdDevTimes = Math.sqrt( (squaredTimes - times.size() * avgTime * avgTime) / (times.size() - 1) );
-      double stdDevFeatures = Math.sqrt( (squaredFeatures - features.size() * avgFeatures * avgFeatures) / (features.size() - 1) );
-      System.out.println( "Time -> average, min, max, and standard deviation over " + times.size() +  " requests: | " +  df.format(avgTime) + " | " + df.format(minTime) + " | " + df.format(maxTime)  + " | " + df.format(stdDevTimes) + " | ");
-      System.out.println( "Features -> average, min, max, and standard deviation over " + features.size() +  " requests: | " +  df.format(avgFeatures) + " | " + df.format(minFeatures)  + " | " + df.format(maxFeatures) + " | " + df.format(stdDevFeatures) + " | ");
     }catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -150,5 +148,49 @@ public class FeatureServiceConcurrentTester2 {
       executor.shutdownNow();
       System.out.println("shutdown finished");
     }
+  }
+
+  private static void calculateStats(Stream<Tuple> results, int numbConcurrentCalls) {
+    DecimalFormat df = new DecimalFormat("#.#");
+    df.setGroupingUsed(true);
+    df.setGroupingSize(3);
+
+    final List<Long> times = new LinkedList<>();
+    final List<Long> features = new LinkedList<>();
+    results.forEach( tuple -> {
+      times.add(tuple.requestTime);
+      features.add(tuple.returnedFeatures);
+    });
+
+    double timeTotal = 0;
+    double featureTotal = 0;
+    long minTime = times.get(0);
+    long maxTime = times.get(0);
+    long minFeatures = features.get(0);
+    long maxFeatures = features.get(0);
+
+    double squaredTimes = 0.0;
+    double squaredFeatures = 0.0;
+
+    for (int i=0; i<times.size(); i++) {
+      timeTotal += times.get(i);
+      featureTotal += features.get(i);
+      if (times.get(i) < minTime) minTime = times.get(i);
+      if (times.get(i) > maxTime) maxTime = times.get(i);
+      if (features.get(i) < minFeatures) minFeatures = features.get(i);
+      if (features.get(i) > maxFeatures) maxFeatures = features.get(i);
+
+      squaredTimes += times.get(i) * times.get(i);
+      squaredFeatures += features.get(i) * features.get(i);
+    }
+//      long totalFinal = results.reduce(0L, (total, i) -> total + i);
+//      System.out.println( (double)totalFinal / (double)callables.size());
+
+    double avgTime = timeTotal / times.size();
+    double avgFeatures = featureTotal / features.size();
+    double stdDevTimes = Math.sqrt( (squaredTimes - times.size() * avgTime * avgTime) / (times.size() - 1) );
+    double stdDevFeatures = Math.sqrt( (squaredFeatures - features.size() * avgFeatures * avgFeatures) / (features.size() - 1) );
+    System.out.println( "Time -> average, min, max, and standard deviation over " + times.size() +  " requests: | " +  df.format(avgTime) + " | " + df.format(minTime) + " | " + df.format(maxTime)  + " | " + df.format(stdDevTimes) + " | ");
+    System.out.println( "Features -> average, min, max, and standard deviation over " + features.size() +  " requests: | " +  df.format(avgFeatures) + " | " + df.format(minFeatures)  + " | " + df.format(maxFeatures) + " | " + df.format(stdDevFeatures) + " | ");
   }
 }

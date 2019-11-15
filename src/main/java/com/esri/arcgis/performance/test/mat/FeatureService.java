@@ -4,14 +4,23 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -19,6 +28,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -71,37 +81,101 @@ public class FeatureService {
   private String f = "json";
 
   private int timeoutInSeconds = 60;
-  private String cookie = "";
+  private String cookie = null;
 
-  FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds) {
+  FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds, boolean requireCookie) {
     this.serviceName = serviceName;
     this.servicesUrl = servicesUrl.endsWith("/") ? servicesUrl : servicesUrl + "/";
     this.outFields = "*";
-    try {
-      BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
-      String line = reader.readLine();
-      if (line != null) cookie = line;
-      else System.err.println("Error in reading required 'Cookie' string.");
-    } catch (Exception ex) {
-      System.err.println("Error in reading required 'Cookie' string.");
-      ex.printStackTrace();
+
+    if (requireCookie) {
+      try {
+        BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
+        String line = reader.readLine();
+        if (line != null) cookie = line;
+        else System.err.println("Error in reading required 'Cookie' string.");
+      } catch (Exception ex) {
+        System.err.println("Error in reading required 'Cookie' string.");
+        ex.printStackTrace();
+      }
     }
+
+    this.timeoutInSeconds = timeoutInSeconds;
     createClient();
   }
 
   private void createClient() {
-    // cut it from browser
+    try {
+      if (cookie == null) {
+        // use the TrustSelfSignedStrategy to allow Self Signed Certificates
+//        SSLContext sslContext = SSLContextBuilder
+//                .create()
+//                .loadTrustMaterial(new TrustSelfSignedStrategy())
+//                .build();
 
-    RequestConfig.Builder requestBuilder = RequestConfig.custom();
-    requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
-    requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
-    requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
+        // setup a Trust Strategy that allows all certificates.
+        //
+        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+          public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            return true;
+          }
+        }).build();
 
-    PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-    httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(requestBuilder.build())
-            .setConnectionManager(connectionManager)
-            .build();
+
+        // we can optionally disable hostname verification.
+        // if you don't want to further weaken the security, you don't have to include this.
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+
+        // create an SSL Socket Factory to use the SSLContext with the trust self signed certificate strategy
+        // and allow all hosts verifier.
+        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
+
+
+        // don't check Hostnames, either.
+        //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
+        HostnameVerifier hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+        // here's the special part:
+        //      -- need to create an SSL Socket Factory, to use our weakened "trust strategy";
+        //      -- and create a Registry, to register it.
+        //
+        SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .register("https", sslSocketFactory)
+                .build();
+
+        // now, we create connection-manager using our Registry.
+        //      -- allows multi-threaded use
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager( socketFactoryRegistry);
+        // PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+
+        RequestConfig.Builder requestBuilder = RequestConfig.custom();
+        requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
+        requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
+        requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
+
+        httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestBuilder.build())
+                .setSSLContext(sslContext)
+//                .setSSLSocketFactory(connectionFactory)
+                .setConnectionManager(connectionManager)
+                .build();
+      } else {
+        RequestConfig.Builder requestBuilder = RequestConfig.custom();
+        requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
+        requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
+        requestBuilder.setConnectionRequestTimeout(timeoutInSeconds * 1000);
+
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestBuilder.build())
+                .setConnectionManager(connectionManager)
+                .build();
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   /**
@@ -170,8 +244,6 @@ public class FeatureService {
         ex.printStackTrace();
       }
     }
-
-    this.timeoutInSeconds = timeoutInSeconds;
   }
 
   Tuple getCount(String where) {

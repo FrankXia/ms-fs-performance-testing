@@ -202,7 +202,7 @@ public class MapService {
 
 
   Tuple getCount(String where, String boundingBox) {
-    FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds);
+    FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
     return featureService.getCount(where, boundingBox);
   }
 
