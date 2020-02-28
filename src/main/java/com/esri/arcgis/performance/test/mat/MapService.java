@@ -70,6 +70,7 @@ public class MapService {
     httpClient = HttpClients.custom()
             .setDefaultRequestConfig(requestBuilder.build())
             .setConnectionManager(connectionManager)
+            .disableAutomaticRetries()
             .build();
   }
 
@@ -99,6 +100,7 @@ public class MapService {
               .setDefaultCredentialsProvider(provider)
               .setDefaultRequestConfig(requestBuilder.build())
               .setConnectionManager(connectionManager)
+              .disableAutomaticRetries()
               .build();
     } else {
       try {
@@ -203,7 +205,7 @@ public class MapService {
 
   Tuple getCount(String where, String boundingBox) {
     FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
-    return featureService.getCount(where, boundingBox);
+    return featureService.getCount(where, boundingBox, true);
   }
 
 }

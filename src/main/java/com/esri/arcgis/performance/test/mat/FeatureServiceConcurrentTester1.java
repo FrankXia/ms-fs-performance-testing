@@ -28,22 +28,27 @@ public class FeatureServiceConcurrentTester1 {
 
       String outputFileName = args[6];
 
-      int timeoutInSeconds = 60;
+      boolean returnCountOnly = false;
       if (args.length >= 8) {
-        timeoutInSeconds = Integer.parseInt(args[7]);
+        returnCountOnly = Boolean.parseBoolean(args[7]);
+      }
+
+      int timeoutInSeconds = 60;
+      if (args.length >= 9) {
+        timeoutInSeconds = Integer.parseInt(args[8]);
       }
 
       String groupByFieldName = null;
       String outStatistics = null;
-      if (args.length >= 10) {
-        groupByFieldName = args[8];
-        outStatistics = args[9];
+      if (args.length >= 11) {
+        groupByFieldName = args[9];
+        outStatistics = args[10];
       }
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName);
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName, returnCountOnly);
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 <Services_Url> <Service_Name> <Number_Of_Threads> <Number_Of_Concurrent_Calls> <Path to bounding box file> <Number of lines to skip>  <Output File Name> " +
-              "{ <Timeout in seconds> <Group By field name> <Out Statistics>}");
+              "{ <Return Count Only> <Timeout in seconds> <Group By field name> <Out Statistics>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ " +
               "Safegraph3 5 50 ./docs/safegraph3.txt 0 ./docs/output3_5_50.txt device_id  \"[" +
@@ -55,11 +60,13 @@ public class FeatureServiceConcurrentTester1 {
     }
   }
 
-  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String groupByFieldName, String outStatistics, String boundingBox, int timeoutInSeconds) {
+  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String groupByFieldName, String outStatistics, String boundingBox, int timeoutInSeconds, boolean returnCountOnly) {
     Callable<Tuple> task = () -> {
       FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
       if (groupByFieldName != null & outStatistics != null) {
         return featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
+      } else if (returnCountOnly) {
+        return featureService.getCount("1=1", boundingBox, true);
       } else {
         return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
       }
@@ -68,7 +75,7 @@ public class FeatureServiceConcurrentTester1 {
   }
 
   private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls, String groupByFieldName,
-                                        String outStatistics, String boundingBoxFileName, int numSkips, int timeoutInSeconds, String outputFileName) {
+                                        String outStatistics, String boundingBoxFileName, int numSkips, int timeoutInSeconds, String outputFileName, boolean returnCountOnly) {
     long startTime = System.currentTimeMillis();
 
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
@@ -92,7 +99,7 @@ public class FeatureServiceConcurrentTester1 {
 
       for (int index=0; index < numbConcurrentCalls; index++) {
         String boundingBox = boundingBoxes.get(index);
-        callables.add(createTask(servicesUrl, serviceName, groupByFieldName, outStatistics, boundingBox, timeoutInSeconds));
+        callables.add(createTask(servicesUrl, serviceName, groupByFieldName, outStatistics, boundingBox, timeoutInSeconds, returnCountOnly));
       }
 
       Stream<Tuple> results =

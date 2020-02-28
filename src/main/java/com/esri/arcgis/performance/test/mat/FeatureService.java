@@ -83,6 +83,9 @@ public class FeatureService {
   private int timeoutInSeconds = 60;
   private String cookie = null;
 
+  private static int errorCount = 0;
+  private static int totalCount = 0;
+
   FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds, boolean requireCookie) {
     this.serviceName = serviceName;
     this.servicesUrl = servicesUrl.endsWith("/") ? servicesUrl : servicesUrl + "/";
@@ -160,6 +163,7 @@ public class FeatureService {
                 .setSSLContext(sslContext)
 //                .setSSLSocketFactory(connectionFactory)
                 .setConnectionManager(connectionManager)
+                .disableAutomaticRetries()
                 .build();
       } else {
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -171,6 +175,7 @@ public class FeatureService {
         httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(requestBuilder.build())
                 .setConnectionManager(connectionManager)
+                .disableAutomaticRetries()
                 .build();
       }
     } catch (Exception ex) {
@@ -206,6 +211,7 @@ public class FeatureService {
               .setDefaultCredentialsProvider(provider)
               .setDefaultRequestConfig(requestBuilder.build())
               .setConnectionManager(connectionManager)
+              .disableAutomaticRetries()
               .build();
     }
 //    else {
@@ -246,26 +252,26 @@ public class FeatureService {
     }
   }
 
-  Tuple getCount(String where) {
+  Tuple getCount(String where, boolean closeClient) {
     resetParameters2InitialValues();
     this.where = where == null? "" : where.trim();
-    return getCount();
+    return getCount(closeClient);
   }
 
-  Tuple getCount(String where, String boundingBox) {
+  Tuple getCount(String where, String boundingBox, boolean closeClient) {
     resetParameters2InitialValues();
     this.geometry = boundingBox;
     this.where = where == null? "" : where.trim();
-    return getCount();
+    return getCount(closeClient);
   }
 
-  Tuple getCount() {
+  Tuple getCount(boolean closeClient) {
     this.returnCountOnly = true;
     long totalCount = 0L;
     int errorCode = 0;
     long start = System.currentTimeMillis();
     String queryParameters = composeGetRequestQueryParameters();
-    String response = executeRequest(queryParameters, false);
+    String response = executeRequest(queryParameters, closeClient);
     if (response != null) {
       System.out.println(response);
       if (response.trim().startsWith("{")) {
@@ -491,15 +497,22 @@ public class FeatureService {
   private String executeRequest(String queryParameters, boolean closeClient) {
     CloseableHttpClient client =  httpClient;
     //HttpClientBuilder.create().build();
+    totalCount++;
     try {
       String url = servicesUrl + serviceName + "/FeatureServer/0/query?" + queryParameters;
-      System.out.println(Thread.currentThread() + ": " +  url);
+      System.out.println(Thread.currentThread() + " <===> " +  url);
       //long start = System.currentTimeMillis();
+
+      // use Apache HttpClient
       String result = Utils.executeHttpGET(client, url, closeClient, cookie);
+      // use simple http client
+//      String result = Utils.executeHttpsSimpleGET(url, cookie);
+
       //System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName);
       return result;
     } catch (Exception ex) {
-      ex.printStackTrace();
+      System.err.println("Error count => " + (errorCount++) +", total count => " + totalCount + ", " + System.currentTimeMillis());
+      //ex.printStackTrace();
     }
     return null;
   }

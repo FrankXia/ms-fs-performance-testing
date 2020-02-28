@@ -193,7 +193,7 @@ public class FeatureServiceTester {
     System.out.println("======== get total count for each service ========= ");
     for (String table: tableNames) {
       FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
-      featureService.getCount("1=1");
+      featureService.getCount("1=1", true);
     }
   }
 

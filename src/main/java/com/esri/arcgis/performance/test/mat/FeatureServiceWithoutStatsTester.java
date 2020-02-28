@@ -318,7 +318,7 @@ public class FeatureServiceWithoutStatsTester {
     for (String table: tableNames) {
       FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       for (int i=0; i<numRuns; i++) {
-        Tuple tuple = featureService.getCount("1=1");
+        Tuple tuple = featureService.getCount("1=1", true);
         stats[i] = tuple.requestTime * 1.0;
       }
     }
