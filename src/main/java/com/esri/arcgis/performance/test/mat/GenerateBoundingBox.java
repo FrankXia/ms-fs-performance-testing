@@ -17,9 +17,11 @@ public class GenerateBoundingBox {
 
   private static void getBoundingBoxWith10kFeatures(String[] args) {
     if (args == null || args.length < 3) {
-      System.out.println("Usage: java -cp ./ms-ms-performance-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.GenerateBoundingBox " +
-          "<Services Url> <Service Name> <Output File> { <# of bounding boxes: 259> <width: 180> <height: 90> <Return range: 9900,10000> <Min X,Y> <Max X,Y>}\n" +
-              "Ex: java -cp ./target/ms-fs-performance-test-1.0.jar com.esri.arcgis.performance.test.mat.GenerateBoundingBox https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ Safegraph3 safegraph3.txt 1 30 20 100000,1000000 -125,25 65,50");
+      System.out.println("Usage: java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.GenerateBoundingBox " +
+          "<Services Url> <Service Name> <Output File> { <# of bounding boxes: 100> <width: 180> <height: 90> <Return range: 9900,10000> <Min X,Y> <Max X,Y>}\n" +
+              "Ex: java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.GenerateBoundingBox https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ Safegraph3 safegraph3.txt 100 30 20 100000,1000000 -125,25 65,50\n" +
+              "java -cp ./target/ms-fs-performance-test-1.0.jar com.esri.arcgis.performance.test.mat.GenerateBoundingBox https://us-iotdev.arcgis.com/fx0323/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services 5241_10kGlobalFeatures_4326_Extent extent-10-15-features.txt 50 3 2 10,15\n"
+              );
       return;
     }
     int featureLimitMax = 10000;

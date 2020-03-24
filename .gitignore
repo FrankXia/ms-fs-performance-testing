@@ -40,3 +40,10 @@ local.properties
 *.log
 
 ./autoscaler-deployment.yaml
+./mat-0324
+./extent-10-15-features-a.txt
+./extent-10-15-features.txt
+./mat-deployment.json
+./mat-deployment.yaml
+./mat-patch-deployment.json
+./summary-same-extent.csv
