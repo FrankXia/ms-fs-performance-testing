@@ -5,11 +5,12 @@ target/
 *.cache
 *.versionsBackup
 docs/
-extents/
-mat-performance-testing-10_15-features/
-mat-performance-testing-100-120-features/
-mat-performance-testing-500-600-features/
-mat-performance-testing-1000-1200-features/
+extents-100k/
+extents-10k/
+extents-10k/mat-performance-testing-10-15-features/
+extents-10k/mat-performance-testing-100-120-features/
+extents-10k/mat-performance-testing-500-600-features/
+extents-10k/mat-performance-testing-1000-1200-features/
 
 # Eclipse
 .project

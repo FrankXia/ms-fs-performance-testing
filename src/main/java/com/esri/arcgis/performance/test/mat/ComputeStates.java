@@ -1,41 +1,58 @@
 package com.esri.arcgis.performance.test.mat;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class ComputeStates {
-    static String root = "/Users/frank/github/ms-fs-performance-testing/";
 
     public static void main(String[] args) {
-        //sum_10_15_features();
-        sum_100_120_features();
     }
 
-    private static void sum_10_15_features()
+    private static void sum_10k_performance()
     {
-        String folderName = "mat-performance-testing-10_15-features/";
-        String outputPostfix = "10-15-features";
-        summarizeRandomExtents(true, folderName, outputPostfix);
-        summarizeRandomExtents(false, folderName, outputPostfix);
-
-        summarizeSameExtents(true, folderName, outputPostfix);
-        summarizeSameExtents(false, folderName, outputPostfix);
+        String root = "/Users/frank/github/ms-fs-performance-testing/extents-10k/";
+        sum_10_15_features(root);
+        sum_100_120_features(root);
+        sum_500_600_features(root);
     }
 
-    private static void sum_100_120_features()
+    private static void sum_500_600_features(String root)
+    {
+        String folderName = "mat-performance-testing-500-600-features/";
+        String outputPostfix = "500-600-features";
+        summarizeRandomExtents(root, true, folderName, outputPostfix);
+        summarizeRandomExtents(root,false, folderName, outputPostfix);
+
+        summarizeSameExtents(root, true, folderName, outputPostfix);
+        summarizeSameExtents(root, false, folderName, outputPostfix);
+    }
+
+    private static void sum_10_15_features(String root)
+    {
+        String folderName = "mat-performance-testing-10-15-features/";
+        String outputPostfix = "10-15-features";
+        summarizeRandomExtents(root, true, folderName, outputPostfix);
+        summarizeRandomExtents(root, false, folderName, outputPostfix);
+
+        summarizeSameExtents(root, true, folderName, outputPostfix);
+        summarizeSameExtents(root, false, folderName, outputPostfix);
+    }
+
+    private static void sum_100_120_features(String root)
     {
         String folderName = "mat-performance-testing-100-120-features/";
         String outputPostfix = "100-120-features";
-        summarizeRandomExtents(true, folderName, outputPostfix);
-        summarizeRandomExtents(false, folderName, outputPostfix);
+        summarizeRandomExtents(root, true, folderName, outputPostfix);
+        summarizeRandomExtents(root, false, folderName, outputPostfix);
 
-        summarizeSameExtents(true, folderName, outputPostfix);
-        summarizeSameExtents(false, folderName, outputPostfix);
+        summarizeSameExtents(root, true, folderName, outputPostfix);
+        summarizeSameExtents(root, false, folderName, outputPostfix);
     }
 
-    private static void summarizeSameExtents(boolean asCSV, String folderName, String outputFilePostfix)
+    private static void summarizeSameExtents(String root, boolean asCSV, String folderName, String outputFilePostfix)
     {
         try {
             String fileName = "summary-same-extent-" + outputFilePostfix + ".csv";
@@ -47,7 +64,7 @@ public class ComputeStates {
         }
     }
 
-    private static void summarizeRandomExtents(boolean asCSV, String folderName, String outputFilePostfix)
+    private static void summarizeRandomExtents(String root, boolean asCSV, String folderName, String outputFilePostfix)
     {
         try {
             String fileName = "summary-random-extent-" + outputFilePostfix + ".csv";
@@ -61,10 +78,10 @@ public class ComputeStates {
     private static void computeStates(String filePrefix, String folder, String outputFile, boolean asCSV) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
         if (asCSV) {
-            writer.write("# of concurrent threads, # of requests, average, min, max, # of errors");
+            writer.write("# of concurrent threads, # of requests, average, min, max, # of errors, error rate");
         } else {
             writer.write("<table class=\"tg\">");
-            writer.write("<tr><td># of concurrent threads</td><td> # of requests</td><td> average</td><td> min</td><td> max</td><td> # of errors</td>");
+            writer.write("<tr><td># of concurrent threads</td><td> # of requests</td><td> average</td><td> min</td><td> max</td><td> # of errors</td><td>error rate</td>");
         }
         writer.newLine();
 
@@ -110,14 +127,16 @@ public class ComputeStates {
                 reader.close();
 
                 int errors = totalRequests - validCount;
+                double errorRate = (double)errorCount / (double)totalRequests * 100;
                 double average = totalTime / totalRequests;
                 int numThreads = totalRequests / 10;
 
+                DecimalFormat decimalFormat = new DecimalFormat("###.00");
                 if (asCSV)
-                    writer.write(numThreads+"," + totalRequests + "," + average +"," + min + "," + max +"," + errorCount);
+                    writer.write(numThreads+"," + totalRequests + "," +decimalFormat.format(average) +"," + min + "," + max +"," + errorCount + "," +  decimalFormat.format(errorRate));
                 else {
                     writer.write("<tr>");
-                    writer.write("<td>" +numThreads+"</td><td>" + totalRequests + "</td><td>" + average +"</td><td>" + min + "</td><td>" + max +"</td><td>" + errorCount + "</td>");
+                    writer.write("<td>" + numThreads + "</td><td>" + totalRequests + "</td><td>" + decimalFormat.format(average) + "</td><td>" + min + "</td><td>" + max + "</td><td>" + errorCount + "</td><td>" + decimalFormat.format(errorRate)  + "</td>");
                     writer.write("</tr>");
                 }
                 writer.newLine();
