@@ -24,7 +24,7 @@ public class FeatureServiceConcurrentTester1a {
       String outputFileName = args[4];
       String boundingBox = args[5];
 
-      int timeoutInSeconds = 60;
+      int timeoutInSeconds = 600;
       if (args.length >= 7) {
         timeoutInSeconds = Integer.parseInt(args[6]);
       }
