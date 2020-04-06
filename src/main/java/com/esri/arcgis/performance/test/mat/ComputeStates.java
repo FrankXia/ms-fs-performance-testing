@@ -9,29 +9,49 @@ import java.util.List;
 public class ComputeStates {
 
     public static void main(String[] args) {
-//        sum_10k_performance_mac_only();
-        sum_10k_performance_mac_and_windows();
+        sum_10k_performance_mac_only();
+//        sum_10k_performance_mac_and_windows();
     }
 
     // one testing client
     private static void sum_10k_performance_mac_only()
     {
         String root = "/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMac/";
-        sum_10_15_features(root);
-        sum_100_120_features(root);
-        sum_500_600_features(root);
+
+//        String folderName_10_15 = "mat-performance-testing-10-15-features/";
+//        sum_10_15_features(root, folderName_10_15);
+//
+//        String folderName_100_120_2 = "mat-performance-testing-100-120-features-2/";
+//        sum_100_120_features(root, folderName_100_120_2);
+//
+//        String folderName_100_120_3 = "mat-performance-testing-100-120-features-3/";
+//        sum_100_120_features(root, folderName_100_120_3);
+
+        String folderName_100_120_4 = "mat-performance-testing-100-120-features-4/";
+        sum_100_120_features(root, folderName_100_120_4);
+
+//        String folderName_500_600 = "mat-performance-testing-500-600-features/";
+//        sum_500_600_features(root, folderName_500_600);
     }
 
     // two testing client
     private static void sum_10k_performance_mac_and_windows() {
         String root = "/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMacAndWindows/";
-//        sum_10_15_features(root);
-//        sum_100_120_features(root);
-        sum_500_600_features(root);
+
+//        String folderName_10_15 = "mat-performance-testing-10-15-features/";
+//        sum_10_15_features(root, folderName_10_15);
+
+        String folderName_100_120_2 = "mat-performance-testing-100-120-features-2/";
+        sum_100_120_features(root, folderName_100_120_2);
+
+//        String folderName_100_120 = "mat-performance-testing-100-120-features/";
+//        sum_100_120_features(root, folderName_100_120);
+
+//        String folderName_500_600 = "mat-performance-testing-500-600-features/";
+//        sum_500_600_features(root, folderName_500_600);
     }
 
-    private static void sum_10_15_features(String root) {
-        String folderName = "mat-performance-testing-10-15-features/";
+    private static void sum_10_15_features(String root, String folderName) {
         // summarize Mac side only with two testing client
         String inputPostfix_a = "_a.txt";
         String outputPostfix_a_mac = "10-15-features-a-mac";
@@ -49,8 +69,7 @@ public class ComputeStates {
         sum_same_random_states(root, folderName, inputPostfix_a_b, outputPostfix_a_b);
     }
 
-    private static void sum_100_120_features(String root) {
-        String folderName = "mat-performance-testing-100-120-features/";
+    private static void sum_100_120_features(String root, String folderName) {
         // summarize Mac side only with two testing client
         String inputPostfix_a = "_a.txt";
         String outputPostfix_a_mac = "100-120-features-a-mac";
@@ -68,8 +87,7 @@ public class ComputeStates {
         sum_same_random_states(root, folderName, inputPostfix_a_b, outputPostfix_a_b);
     }
 
-    private static void sum_500_600_features(String root) {
-        String folderName = "mat-performance-testing-500-600-features/";
+    private static void sum_500_600_features(String root, String folderName) {
         // summarize Mac side only with two testing client
         String inputPostfix_a = "_a.txt";
         String outputPostfix_a_mac = "500-600-features-a-mac";
@@ -87,10 +105,9 @@ public class ComputeStates {
         sum_same_random_states(root, folderName, inputPostfix_a_b, outputPostfix_a_b);
     }
 
-
     private static void sum_same_random_states(String root, String folderName, String inputFilePostfix,  String outputPostfix) {
-        summarizeRandomExtents(root, true, folderName, inputFilePostfix, outputPostfix);
-        summarizeRandomExtents(root,false, folderName, inputFilePostfix, outputPostfix);
+//        summarizeRandomExtents(root, true, folderName, inputFilePostfix, outputPostfix);
+//        summarizeRandomExtents(root,false, folderName, inputFilePostfix, outputPostfix);
 
         summarizeSameExtents(root, true, folderName, inputFilePostfix, outputPostfix);
         summarizeSameExtents(root, false, folderName, inputFilePostfix, outputPostfix);
@@ -101,7 +118,7 @@ public class ComputeStates {
         try {
             String fileName = "summary-same-extent-" + outputFilePostfix + ".csv";
             if (!asCSV) fileName = "summary-same-extent-" + outputFilePostfix + ".txt";
-            computeStates("same_extent_", inputFilePostfix, root + folderName, root + fileName, asCSV);
+            computeStates("same_extent_", inputFilePostfix, root + folderName, root + folderName + fileName, asCSV);
 
         }catch (Exception ex) {
             ex.printStackTrace();
@@ -113,7 +130,7 @@ public class ComputeStates {
         try {
             String fileName = "summary-random-extent-" + outputFilePostfix + ".csv";
             if (!asCSV) fileName = "summary-random-extent-" +  outputFilePostfix + ".txt";
-            computeStates("random_extent_", inputFilePostfix, root + folderName, root + fileName, asCSV);
+            computeStates("random_extent_", inputFilePostfix, root + folderName, root + folderName + fileName, asCSV);
         }catch (Exception ex) {
             ex.printStackTrace();
         }
