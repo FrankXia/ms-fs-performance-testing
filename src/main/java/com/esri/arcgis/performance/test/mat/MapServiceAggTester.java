@@ -12,29 +12,35 @@ public class MapServiceAggTester {
       String aggStyle = args[5];
 
       int timeoutInSeconds = 60;
-      if (args.length > 7) {
+      if (args.length >= 7) {
         timeoutInSeconds = Integer.parseInt(args[6]);
       }
-      String aggregationStyle = "square";
-      if (args.length > 8) {
-        aggregationStyle = args[7];
+
+      int featureLimit = 1000;
+      if (args.length >= 8) {
+        featureLimit = Integer.parseInt(args[7]);
       }
 
-      singleTesting(servicesUrl, serviceName, width, height, aggStyle, numCalls, timeoutInSeconds, aggregationStyle);
+      String aggregationStyle = "square";
+      if (args.length >= 9) {
+        aggregationStyle = args[8];
+      }
+
+      singleTesting(servicesUrl, serviceName, width, height, aggStyle, numCalls, timeoutInSeconds, aggregationStyle, featureLimit);
 
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.MapServiceAggTester " +
-          "<Services Url> <Service name> <Number of calls> <Bounding box width> <Bounding box height> <Aggregation style>  {<Timeout in seconds: 60> <Aggregation Style (square/pointyHexagon)>}");
+          "<Services Url> <Service name> <Number of calls> <Bounding box width> <Bounding box height> <Aggregation style>  {<Timeout in seconds: 60> <Feature Limit> <Aggregation Style (square/pointyHexagon)>}");
     }
   }
 
-  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int numCalls, int timeoutInSeconds, String aggregationStyle) {
-    MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle);
+  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int numCalls, int timeoutInSeconds, String aggregationStyle, int featureLimit) {
+    MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
     Double[] times = new Double[numCalls];
     for (int index=0; index < numCalls; index++) {
       String boundingBox = Utils.getRandomBoundingBox(width, height);
-      long time = mapService.exportMap(boundingBox, 4326, aggStyle);
-      times[index] = time * 1.0;
+      Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle);
+      times[index] = tuple.requestTime * 1.0;
     }
     Utils.computeStats(times, numCalls);
   }

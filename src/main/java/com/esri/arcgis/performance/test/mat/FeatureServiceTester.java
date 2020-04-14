@@ -176,7 +176,7 @@ public class FeatureServiceTester {
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
     for (String table: tableNames) {
       FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
-      featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
+      featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326",  boundingBox, true);
     }
   }
   

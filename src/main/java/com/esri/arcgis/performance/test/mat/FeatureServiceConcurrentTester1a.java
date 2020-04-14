@@ -24,16 +24,25 @@ public class FeatureServiceConcurrentTester1a {
       String outputFileName = args[4];
       String boundingBox = args[5];
 
-      int timeoutInSeconds = 600;
+      String outSR = "4326";
       if (args.length >= 7) {
-        timeoutInSeconds = Integer.parseInt(args[6]);
+        outSR = args[6];
+      }
+
+      int timeoutInSeconds = 600;
+      if (args.length >= 8) {
+        timeoutInSeconds = Integer.parseInt(args[7]);
       }
 
       boolean returnCountOnly = false;
-      concurrentTesting(servicesUrl, serviceName, numThreads, numConcurrentCalls, boundingBox, timeoutInSeconds, outputFileName, returnCountOnly);
+      if (args.length >= 9) {
+        returnCountOnly = Boolean.parseBoolean(args[8]);
+      }
+
+      concurrentTesting(servicesUrl, serviceName, numThreads, numConcurrentCalls, boundingBox, timeoutInSeconds, outputFileName, returnCountOnly, outSR);
     } else {
       System.out.println("Usage: java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1a <Services_Url> <Service_Name> <# of Threads> <Number_Of_Concurrent Requests> <Output File Name> <Bounding Box>" +
-              "{ <Return Count Only> <Timeout in seconds>}");
+              "{ <Output SR ID> <Timeout in seconds> <Return Count Only>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1a https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ " +
               "safegraph 5 ./same_extent_concurrent-5.txt");
@@ -41,19 +50,19 @@ public class FeatureServiceConcurrentTester1a {
     }
   }
 
-  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, boolean returnCountOnly) {
+  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, boolean returnCountOnly, String outSR) {
     Callable<Tuple> task = () -> {
       FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
       if (returnCountOnly) {
         return featureService.getCount("1=1", boundingBox, true);
       } else {
-        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
+        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", outSR, boundingBox, true);
       }
     };
     return task;
   }
 
-  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numConcurrentCalls, String boundingBox, int timeoutInSeconds, String outputFileName, boolean returnCountOnly) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numConcurrentCalls, String boundingBox, int timeoutInSeconds, String outputFileName, boolean returnCountOnly, String outSR) {
     long startTime = System.currentTimeMillis();
 
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
@@ -62,7 +71,7 @@ public class FeatureServiceConcurrentTester1a {
 
     try {
       for (int index=0; index < numConcurrentCalls; index++) {
-        callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, returnCountOnly));
+        callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, returnCountOnly, outSR));
       }
 
       Stream<Tuple> results =

@@ -68,7 +68,7 @@ public class FeatureServiceConcurrentTester1 {
       } else if (returnCountOnly) {
         return featureService.getCount("1=1", boundingBox, true);
       } else {
-        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
+        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326", boundingBox, true);
       }
     };
     return task;

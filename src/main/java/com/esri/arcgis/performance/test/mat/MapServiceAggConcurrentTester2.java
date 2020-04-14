@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-public class MapServiceConcurrentTester {
+public class MapServiceAggConcurrentTester2 {
 
   public static void main(String[] args) {
     if (args.length >= 7) {
@@ -30,31 +30,31 @@ public class MapServiceConcurrentTester {
       if (args.length >= 8) {
         aggregationStyle = args[7];
       }
-      int timeoutInSeconds = 100;
-      if (args.length >= 9) timeoutInSeconds = Integer.parseInt(args[8]);
+      int featureLimit = 1000;
+      if (args.length >= 9) featureLimit = Integer.parseInt(args[8]);
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds, aggregationStyle, outputFileName);
+      int timeoutInSeconds = 100;
+      if (args.length >= 10) timeoutInSeconds = Integer.parseInt(args[9]);
+
+      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds, aggregationStyle, featureLimit, outputFileName);
     } else {
       System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.MapServiceConcurrentTester " +
-          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls> <Path to bounding box file> <Number of lines to skip> <Output file name> {<Aggregation Style (square/pointyHexagon/flatTriangle> <Timeout in seconds: 100> }");
+          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls> <Path to bounding box file> <Number of lines to skip> <Output file name> {<Aggregation Style (square/pointyHexagon/flatTriangle> <Feature Limit> <Timeout in seconds: 100> }");
     }
   }
 
-  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, String aggregationStyle) {
+  private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, String aggregationStyle, long numFeatures, int featureLimit) {
     Callable<Tuple> task = () -> {
-      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle);
-      long success =  mapService.exportMap(boundingBox, 4326);
-      if (success > 0) {
-        return new Tuple(success, 0, 0);
-      } else {
-        return new Tuple(0, 0, (int)success);
-      }
+      MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
+      Tuple tuple = mapService.exportMap(boundingBox, 4326);
+      tuple.returnedFeatures = numFeatures;
+      return tuple;
     };
     return task;
   }
 
   private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls,
-                                        String bboxFile, int lines2Skip, int timeoutInSeconds, String aggregationStyle, String outputFileName) {
+                                        String bboxFile, int lines2Skip, int timeoutInSeconds, String aggregationStyle, int featureLimit, String outputFileName) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
     int port = 9000;
@@ -76,8 +76,12 @@ public class MapServiceConcurrentTester {
 
       int lineRead = 0;
       while (line != null && lineRead < numbConcurrentCalls) {
-        String boundingBox = line.split("[|]")[0];
-        callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, aggregationStyle));
+        String[] bboxAndNumFeatures = line.split("[|]");
+        if (bboxAndNumFeatures.length == 2) {
+          String boundingBox = bboxAndNumFeatures[0];
+          long numFeatures = Long.parseLong(bboxAndNumFeatures[1]);
+          callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, aggregationStyle, numFeatures, featureLimit));
+        }
         lineRead++;
         line = reader.readLine();
       }

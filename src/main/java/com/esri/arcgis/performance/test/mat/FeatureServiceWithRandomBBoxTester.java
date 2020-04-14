@@ -46,7 +46,7 @@ public class FeatureServiceWithRandomBBoxTester {
       String aLine = reader.readLine();
       System.out.println(index + " => " +  aLine);
       String boundingBox = aLine.split("[|]")[0];
-      featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, false);
+      featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326", boundingBox, false);
       data[index] = (System.currentTimeMillis() - start) * 1.0;
     }
     Utils.computeStats(data, numbTests);

@@ -31,7 +31,7 @@ public class MapService {
   private String f = "image";
   private String dynamicLayers = "";
 
-  private int featureLimit = 10000;
+  private int featureLimit = 1000;
   private String aggregationStyle = "pointyHexagon";
 
   private CloseableHttpClient httpClient;
@@ -40,10 +40,11 @@ public class MapService {
   private int timeoutInSeconds = 60; // seconds
   private String cookie = "";
 
-  public MapService(String servicesUrl, String serviceName, int timeoutInSeconds, String aggregationStyle) {
+  public MapService(String servicesUrl, String serviceName, int timeoutInSeconds, String aggregationStyle, int featureLimit) {
     this.servicesUrl = servicesUrl.endsWith("/")? servicesUrl : servicesUrl + "/";
     this.serviceName = serviceName;
     this.aggregationStyle = aggregationStyle;
+    this.featureLimit = featureLimit;
 
     try {
       BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
@@ -135,19 +136,12 @@ public class MapService {
     this.timeoutInSeconds = timeoutInSeconds;
   }
 
-  public long exportMap(String bbox, int bboxSR) {
+  public Tuple exportMap(String bbox, int bboxSR) {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
-    long startTime = System.currentTimeMillis();
 
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    long response = Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
-    if (response == -1) {
-      System.out.println("?????? failed to export image!");
-    }
-    System.out.println("Export image succeeded!");
-
-    return response;
+    return Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
   }
 
   private String getParameters() {
@@ -166,26 +160,13 @@ public class MapService {
     return  queryParameters.toString();
   }
 
-  public long exportMap(String bbox, int bboxSR, String aggregationStyle) {
+  public Tuple exportMap(String bbox, int bboxSR, String aggregationStyle) {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
     this.aggregationStyle = aggregationStyle;
 
-    long start = System.currentTimeMillis();
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    long response = Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
-
-    // System.out.println(queryParameters.toString());
-    // String url = "http://" + host + ":" + port + "/arcgis/rest/services/" + serviceName + "/MapServer/export?";
-    // long response = doHttpUrlConnectionAction(url, queryParameters.toString());
-
-
-    if (response == -1) {
-      System.out.println("?????? failed to export image! " + (System.currentTimeMillis() - start) + " ms");
-      //return (System.currentTimeMillis() - start);
-    }
-    System.out.println("Export image succeeded!");
-    return response;
+    return Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
   }
 
   private String createDynamicLayers(int featureLimit, String layerName) {

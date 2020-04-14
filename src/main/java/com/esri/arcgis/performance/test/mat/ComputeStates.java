@@ -9,12 +9,24 @@ import java.util.List;
 public class ComputeStates {
 
     public static void main(String[] args) {
-//        sum_performance_mac_only("/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMac/");
-//        sum_performance_mac_and_windows("/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMacAndWindows/");
+//        sum_query_performance();
+        sum_map_export_mac_only();
+    }
 
-        sum_performance_mac_only("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/");
+    private static void sum_map_export_mac_only() {
+        String folderName = "mat-export-map-performance/";
+        sum_map_export_square_180_90_mac_only("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/", folderName, "square");
+        sum_map_export_square_180_90_mac_only("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/", folderName, "pointy-hexagon");
+    }
 
+    private static void sum_query_performance() {
+        sum_query_performance_mac_only("/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMac/");
+        sum_query_performance_mac_and_windows("/Users/frank/github/ms-fs-performance-testing/extents-10k/sendFromMacAndWindows/");
+
+        sum_query_performance_mac_only("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/");
         extractCrossStats("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/");
+
+        sum_query_performance_mac_only_2_pods("/Users/frank/github/ms-fs-performance-testing/results-data/dataset-1m/sendFromMac/");
     }
 
     private static void extractCrossStats(String root) {
@@ -189,7 +201,7 @@ public class ComputeStates {
     }
 
     // one testing client
-    private static void sum_performance_mac_only(String root)
+    private static void sum_query_performance_mac_only(String root)
     {
         String folderName_10_15 = "mat-performance-testing-10-15-features/";
         sum_10_15_features(root, folderName_10_15);
@@ -197,20 +209,23 @@ public class ComputeStates {
         String folderName_100_120 = "mat-performance-testing-100-120-features/";
         sum_100_120_features(root, folderName_100_120);
 
-//        String folderName_100_120_2 = "mat-performance-testing-100-120-features-2/";
-//        sum_100_120_features(root, folderName_100_120_2);
-//
-//        String folderName_100_120_3 = "mat-performance-testing-100-120-features-3/";
-//        sum_100_120_features(root, folderName_100_120_3);
-//
-//        String folderName_100_120_4 = "mat-performance-testing-100-120-features-4/";
-//        sum_100_120_features(root, folderName_100_120_4);
+        String folderName_100_120_2 = "mat-performance-testing-100-120-features-2/";
+        sum_100_120_features(root, folderName_100_120_2);
+
+        String folderName_100_120_3 = "mat-performance-testing-100-120-features-3/";
+        sum_100_120_features(root, folderName_100_120_3);
+
+        String folderName_100_120_4 = "mat-performance-testing-100-120-features-4/";
+        sum_100_120_features(root, folderName_100_120_4);
 
         String folderName_500_600 = "mat-performance-testing-500-600-features/";
         sum_500_600_features(root, folderName_500_600);
 
         String folderName_1000_1100 = "mat-performance-testing-1000-1100-features/";
         sum_1000_1100_features(root, folderName_1000_1100);
+
+        String folderName_1000_1100_b = "mat-performance-testing-1000-1100-features-b/";
+        sum_1000_1100_features(root, folderName_1000_1100_b);
 
         String folderName_5000_5500 = "mat-performance-testing-5000-5500-features/";
         sum_5000_5500_features(root, folderName_5000_5500);
@@ -219,31 +234,49 @@ public class ComputeStates {
         sum_9950_10000_features(root, folderName_9950_10000);
     }
 
+    private static void sum_query_performance_mac_only_2_pods(String root)
+    {
+        String folderName_500_600 = "mat-performance-testing-500-600-features-2-pods/";
+        sum_500_600_features(root, folderName_500_600);
+
+        String folderName_1000_1100 = "mat-performance-testing-1000-1100-features-2-pods/";
+        sum_1000_1100_features(root, folderName_1000_1100);
+
+        String folderName_1000_1100_b = "mat-performance-testing-1000-1100-features-2-pods-b/";
+        sum_1000_1100_features(root, folderName_1000_1100_b);
+
+        String folderName_5000_5500 = "mat-performance-testing-5000-5500-features-2-pods/";
+        sum_5000_5500_features(root, folderName_5000_5500);
+
+        String folderName_9950_10000 = "mat-performance-testing-9950-10000-features-2-pods/";
+        sum_9950_10000_features(root, folderName_9950_10000);
+    }
+
     // two testing client
-    private static void sum_performance_mac_and_windows(String root) {
-//        String folderName_10_15 = "mat-performance-testing-10-15-features/";
-//        sum_10_15_features(root, folderName_10_15);
+    private static void sum_query_performance_mac_and_windows(String root) {
+        String folderName_10_15 = "mat-performance-testing-10-15-features/";
+        sum_10_15_features(root, folderName_10_15);
 
         String folderName_100_120_2 = "mat-performance-testing-100-120-features-2/";
         sum_100_120_features(root, folderName_100_120_2);
 
-//        String folderName_100_120 = "mat-performance-testing-100-120-features/";
-//        sum_100_120_features(root, folderName_100_120);
+        String folderName_100_120 = "mat-performance-testing-100-120-features/";
+        sum_100_120_features(root, folderName_100_120);
 
-//        String folderName_500_600 = "mat-performance-testing-500-600-features/";
-//        sum_500_600_features(root, folderName_500_600);
+        String folderName_500_600 = "mat-performance-testing-500-600-features/";
+        sum_500_600_features(root, folderName_500_600);
     }
 
     private static void sum_10_15_features(String root, String folderName) {
         // summarize Mac side only with two testing client
-//        String inputPostfix_a = "_a.txt";
-//        String outputPostfix_a_mac = "10-15-features-a-mac";
-//        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
-//
-//        // summarize Windows side only with two testing client
-//        String inputPostfix_b = "_b.txt";
-//        String outputPostfix_b_win = "10-15-features-b-win";
-//        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
+        String inputPostfix_a = "_a.txt";
+        String outputPostfix_a_mac = "10-15-features-a-mac";
+        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
+
+        // summarize Windows side only with two testing client
+        String inputPostfix_b = "_b.txt";
+        String outputPostfix_b_win = "10-15-features-b-win";
+        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
 
         // summarize with data from both Mac and Windows clients (after testing results data copied from
         // windows machine
@@ -290,14 +323,14 @@ public class ComputeStates {
 
     private static void sum_1000_1100_features(String root, String folderName) {
         // summarize Mac side only with two testing client
-//        String inputPostfix_a = "_a.txt";
-//        String outputPostfix_a_mac = "1000-1100-features-a-mac";
-//        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
-//
-//        // summarize Windows side only with two testing client
-//        String inputPostfix_b = "_b.txt";
-//        String outputPostfix_b_win = "1000-1100-features-b-win";
-//        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
+        String inputPostfix_a = "_a.txt";
+        String outputPostfix_a_mac = "1000-1100-features-a-mac";
+        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
+
+        // summarize Windows side only with two testing client
+        String inputPostfix_b = "_b.txt";
+        String outputPostfix_b_win = "1000-1100-features-b-win";
+        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
 
         // summarize with data from both Mac and Windows clients (after testing results data copied from
         // windows machine
@@ -308,14 +341,14 @@ public class ComputeStates {
 
     private static void sum_5000_5500_features(String root, String folderName) {
         // summarize Mac side only with two testing client
-//        String inputPostfix_a = "_a.txt";
-//        String outputPostfix_a_mac = "5000-5500-features-a-mac";
-//        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
-//
-//        // summarize Windows side only with two testing client
-//        String inputPostfix_b = "_b.txt";
-//        String outputPostfix_b_win = "5000-5500-features-b-win";
-//        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
+        String inputPostfix_a = "_a.txt";
+        String outputPostfix_a_mac = "5000-5500-features-a-mac";
+        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
+
+        // summarize Windows side only with two testing client
+        String inputPostfix_b = "_b.txt";
+        String outputPostfix_b_win = "5000-5500-features-b-win";
+        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
 
         // summarize with data from both Mac and Windows clients (after testing results data copied from
         // windows machine
@@ -326,14 +359,14 @@ public class ComputeStates {
 
     private static void sum_9950_10000_features(String root, String folderName) {
         // summarize Mac side only with two testing client
-//        String inputPostfix_a = "_a.txt";
-//        String outputPostfix_a_mac = "9950-10000-features-a-mac";
-//        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
-//
-//        // summarize Windows side only with two testing client
-//        String inputPostfix_b = "_b.txt";
-//        String outputPostfix_b_win = "9950-10000-features-b-win";
-//        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
+        String inputPostfix_a = "_a.txt";
+        String outputPostfix_a_mac = "9950-10000-features-a-mac";
+        sum_same_random_states(root, folderName, inputPostfix_a, outputPostfix_a_mac);
+
+        // summarize Windows side only with two testing client
+        String inputPostfix_b = "_b.txt";
+        String outputPostfix_b_win = "9950-10000-features-b-win";
+        sum_same_random_states(root, folderName, inputPostfix_b, outputPostfix_b_win);
 
         // summarize with data from both Mac and Windows clients (after testing results data copied from
         // windows machine
@@ -373,10 +406,30 @@ public class ComputeStates {
         }
     }
 
+
+    private static void sum_map_export_square_180_90_mac_only(String root, String folderName, String aggStyle) {
+        String inputPostfix = "-180-90-" + aggStyle + ".txt";
+        String outputPostfix = "180-90-" + aggStyle;
+        summarizeMapExportBBoxExtents(root, true, folderName, inputPostfix, outputPostfix);
+        summarizeMapExportBBoxExtents(root, false, folderName, inputPostfix, outputPostfix);
+    }
+
+    private static void summarizeMapExportBBoxExtents(String root, boolean asCSV, String folderName, String inputFilePostfix, String outputFilePostfix)
+    {
+        try {
+            String fileName = "summary-bbox-extent-" + outputFilePostfix + ".csv";
+            if (!asCSV) fileName = "summary-bbox-extent-" + outputFilePostfix + ".txt";
+            computeStates("export-map-", inputFilePostfix, root + folderName, root + folderName + fileName, asCSV);
+
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     private static void computeStates(String filePrefix, String filePostfix, String folder, String outputFile, boolean asCSV) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
         if (asCSV) {
-            writer.write("# of concurrent threads, # of requests, average, min, max, # of errors, error rate %");
+            writer.write("# of concurrent threads, # of requests, average, min, max, # of errors, error rate %, valid average ");
         } else {
             writer.write("<table class=\"tg\">");
             writer.write("<tr><td># of concurrent threads</td><td> # of requests</td><td> average</td><td> min</td><td> max</td><td> # of errors</td><td>error rate %</td>");
@@ -412,6 +465,7 @@ public class ComputeStates {
             int totalRequests = 0;
             int errorCount = 0;
             double totalTime = 0.0;
+            double validTotalTime = 0.0;
             double min = Double.MAX_VALUE;
             double max = Double.MIN_VALUE;
             for (String fileName : fileNames) {
@@ -428,6 +482,16 @@ public class ComputeStates {
                         if (time < min) min = time;
                         int errorCode = Integer.parseInt(parsedLine[2]);
                         if (errorCode == 2) errorCount++;
+                        else validTotalTime += time;
+                    } else if (parsedLine.length == 2) {
+                        validCount++;
+                        double time = Double.parseDouble(parsedLine[0]);
+                        totalTime += time;
+                        if (time > max) max = time;
+                        if (time < min) min = time;
+                        int errorCode = Integer.parseInt(parsedLine[1]);
+                        if (errorCode == 2) errorCount++;
+                        else validTotalTime += time;
                     }
                     totalRequests++;
                     aLine = reader.readLine();
@@ -438,10 +502,11 @@ public class ComputeStates {
             double errorRate = (double) errorCount / (double) totalRequests * 100;
             double average = totalTime / totalRequests;
             int numThreads = totalRequests / 10;
+            double validAverage = validTotalTime / (totalRequests - errorCount);
 
             DecimalFormat decimalFormat = new DecimalFormat("###.00");
             if (asCSV)
-                writer.write(numThreads + "," + totalRequests + "," + decimalFormat.format(average) + "," + min + "," + max + "," + errorCount + "," + decimalFormat.format(errorRate));
+                writer.write(numThreads + "," + totalRequests + "," + decimalFormat.format(average) + "," + min + "," + max + "," + errorCount + "," + decimalFormat.format(errorRate)  + "," + decimalFormat.format(validAverage));
             else {
                 writer.write("<tr>");
                 writer.write("<td>" + numThreads + "</td><td>" + totalRequests + "</td><td>" + decimalFormat.format(average) + "</td><td>" + min + "</td><td>" + max + "</td><td>" + errorCount + "</td><td>" + decimalFormat.format(errorRate) + "</td>");

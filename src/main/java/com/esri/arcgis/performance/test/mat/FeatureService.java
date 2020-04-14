@@ -326,10 +326,13 @@ public class FeatureService {
     return getFeatures(false, closeClient);
   }
 
-  Tuple getFeaturesWithWhereClauseAndBoundingBox(String where, String boundingBox, boolean closeClient)  throws Exception{
+  Tuple getFeaturesWithWhereClauseAndBoundingBox(String where, String outSR, String boundingBox, boolean closeClient)  throws Exception{
     resetParameters2InitialValues();
     this.where = where == null? "" : where.trim();
     this.geometry = boundingBox;
+    if (outSR != null) {
+      this.outSR = outSR;
+    }
     return getFeatures(false, closeClient);
   }
 

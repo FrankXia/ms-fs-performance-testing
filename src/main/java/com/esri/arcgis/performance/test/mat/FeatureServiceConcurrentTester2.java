@@ -61,7 +61,7 @@ public class FeatureServiceConcurrentTester2 {
       if (groupByFieldName != null & outStatistics != null) {
         return featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
       } else {
-        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, true);
+        return featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326", boundingBox, true);
       }
     };
     return task;

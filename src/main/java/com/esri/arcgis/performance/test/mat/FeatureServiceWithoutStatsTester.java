@@ -91,7 +91,7 @@ public class FeatureServiceWithoutStatsTester {
       if (codes.equals("4")) {
         double boundingBoxWidth = 25;
         if (args.length > 5) boundingBoxWidth = Double.parseDouble(args[5]);
-        testGetFeaturesWithBoundingBox(servicesUrl, tableNames, boundingBoxWidth);
+        testGetFeaturesWithBoundingBox(servicesUrl, tableNames, boundingBoxWidth, "4326");
       }
       if (codes.equals("5")) System.out.println("To be implemented!");
 
@@ -282,7 +282,7 @@ public class FeatureServiceWithoutStatsTester {
     testWithStatsAsWhereClause(speedFieldName, servicesUrl, tableNames);
   }
 
-  private static void testGetFeaturesWithBoundingBox(String servicesUrl, String[] tableNames, double boundingBoxWidth) throws Exception {
+  private static void testGetFeaturesWithBoundingBox(String servicesUrl, String[] tableNames, double boundingBoxWidth, String outSR) throws Exception {
     System.out.println("======== get features from each service with a 10 degree random bounding box ========= ");
     Double[] stats = new Double[numRuns];
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
@@ -290,7 +290,7 @@ public class FeatureServiceWithoutStatsTester {
       FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
       for (int i=0; i<numRuns; i++) {
 
-        Tuple tuple = featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", boundingBox, false);
+        Tuple tuple = featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", outSR, boundingBox, false);
         stats[i] = tuple.requestTime * 1.0;
       }
     }

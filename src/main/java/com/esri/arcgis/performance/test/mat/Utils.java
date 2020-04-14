@@ -22,21 +22,26 @@ public class Utils {
 
   private  static DecimalFormat df = new DecimalFormat("#.#");
 
-  public static long executeHttpGETRequest(CloseableHttpClient client, String url, String serviceName, boolean closeClient, String cookie) {
+  public static Tuple executeHttpGETRequest(CloseableHttpClient client, String url, String serviceName, boolean closeClient, String cookie) {
 
     long start = System.currentTimeMillis();
+    int errorCode = 0;
     try {
       System.out.println(url);
       String response = executeHttpGET(client, url, closeClient, cookie);
-      if (response.equals("503")) return -1;
+      if (response == null) {
+        errorCode = 1;
+      } else if (response.equals("503") || response.equals("504")) {
+        errorCode = 2;
+      }
 
       System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName +  ", " + (executeMapExportRequestCount++));
     } catch (Exception ex) {
       ex.printStackTrace();
-      return -1;
+      errorCode = 3;
     }
 
-    return (System.currentTimeMillis() - start);
+    return new Tuple((System.currentTimeMillis() - start), 0, errorCode);
   }
 
   static String executeHttpGET(CloseableHttpClient client, String url, boolean closeClient, String cookie) throws Exception {
@@ -50,11 +55,15 @@ public class Utils {
     int responseCode = response.getStatusLine().getStatusCode();
     System.out.println("Response Code : " + responseCode);
 
-    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-    StringBuilder result = new StringBuilder();
-    String line = "";
-    while ((line = rd.readLine()) != null) {
-      result.append(line);
+    String resultString = null;
+    if (responseCode == 200) {
+      BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+      StringBuilder result = new StringBuilder();
+      String line = "";
+      while ((line = rd.readLine()) != null) {
+        result.append(line);
+      }
+      resultString = result.toString();
     }
     response.close();
 
@@ -66,10 +75,10 @@ public class Utils {
       }
     }
 
-    if (responseCode == 503)
-      return "503";
+    if (responseCode == 200)
+      return resultString;
     else
-      return result.toString();
+      return String.valueOf(responseCode);
   }
 
   static int requestCount = 0;
