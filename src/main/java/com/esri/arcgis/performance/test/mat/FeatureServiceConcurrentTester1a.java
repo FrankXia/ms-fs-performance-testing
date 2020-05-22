@@ -85,6 +85,7 @@ public class FeatureServiceConcurrentTester1a {
                 }
               });
 
+      System.out.println("Starting writing to the output file if there is one ... ");
       // output stats
       if (outputFileName != null) {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
