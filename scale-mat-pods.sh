@@ -1,0 +1,1 @@
+kubectl patch deployment mat -n a4iot-cluster-services --patch "$(cat scale-mat-patch.json)"

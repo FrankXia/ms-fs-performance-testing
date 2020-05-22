@@ -1,0 +1,1 @@
+kubectl patch deployment autoscaler -n a4iot-cluster-services --patch "$(cat scale-autoscaler-patch.json)"
