@@ -74,7 +74,7 @@ where `https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/
   
 4. Testing with random extents/bounding boxes with different number of concurrent threads (loads), sample command:
 
-`java -cp  ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services 1mil_RandomPoints_042120_new 10 100 ./testing-bb.txt 0 ./random-extent-10-concurrent-100-total.txt`
+`java -cp  ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services 1mil_RandomPoints_042120_new 10 100 ./testing-bb.txt 0 ./random-extent-10-concurrent-100-total.txt`
 
 where 
 
