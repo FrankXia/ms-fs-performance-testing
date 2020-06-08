@@ -1,0 +1,1 @@
+kubectl patch deployment sst -n a4iot-cluster-services --patch "$(cat scale-sst-patch.json)"
