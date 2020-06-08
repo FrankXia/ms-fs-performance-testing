@@ -100,7 +100,7 @@ where
 
 `https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services`, the REST service ending point
 
-`1mil_RandomPoints_042120_new` the feature service name
+`1mil_RandomPoints_042120_new` the map service name
 
 `10` the number of concurrent threads
 
