@@ -60,7 +60,7 @@ where `https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/
   
   where 
   
-  `https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services` the feature service REST ending point
+  `https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services` the REST service ending point
   
   `1mil_RandomPoints_042120_new1` the feature service name
   
@@ -98,7 +98,7 @@ where
 
 where 
 
-`https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services`, the feature service ending point
+`https://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services`, the REST service ending point
 
 `1mil_RandomPoints_042120_new` the feature service name
 
