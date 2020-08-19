@@ -1,5 +1,7 @@
 package com.esri.arcgis.performance.test.mat;
 
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.Envelope2D;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -10,7 +12,6 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -25,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -93,10 +95,18 @@ public class FeatureService {
 
     if (requireCookie) {
       try {
+        File cookieFile  = new File("./mat-access-cookie.txt");
+        long currentTimeMinus24Hours = (new Date()).getTime()  - 24 * 60 * 60 * 1000;
+        if (cookieFile.isFile() && (cookieFile.lastModified() - currentTimeMinus24Hours) > 0 ) {
+          System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old.");
+          System.exit(0);
+        }
+
         BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
         String line = reader.readLine();
         if (line != null) cookie = line;
         else System.err.println("Error in reading required 'Cookie' string.");
+        reader.close();
       } catch (Exception ex) {
         System.err.println("Error in reading required 'Cookie' string.");
         ex.printStackTrace();
@@ -291,6 +301,41 @@ public class FeatureService {
       System.out.println("Error: getCount ==> response is null.");
     }
     return new Tuple(System.currentTimeMillis() - start, totalCount, errorCode);
+  }
+
+  Envelope2D getExtent(boolean closeClient) {
+    this.returnCountOnly = true;
+    this.returnExtentOnly = true;
+    int errorCode = 0;
+    long totalCount = 0;
+    long start = System.currentTimeMillis();
+    String queryParameters = composeGetRequestQueryParameters();
+    String response = executeRequest(queryParameters, closeClient);
+    Envelope2D maxExtent = new Envelope2D();
+    if (response != null) {
+      System.out.println(response);
+      if (response.trim().startsWith("{")) {
+        JSONObject obj = new JSONObject(response);
+        if (obj.optJSONObject("error") == null) {
+          totalCount = obj.getLong("count");
+          JSONObject extentJson = obj.getJSONObject("extent");
+          maxExtent.xmin = extentJson.getDouble("xmin");
+          maxExtent.ymin = extentJson.getDouble("ymin");
+          maxExtent.xmax = extentJson.getDouble("xmax");
+          maxExtent.ymax = extentJson.getDouble("ymax");
+        } else {
+          errorCode = 3;
+          System.out.print("Request getCount failed -> " + response);
+        }
+      } else {
+        errorCode = 2;
+        System.out.println("Error: getCount ==> " + response);
+      }
+    } else {
+      errorCode = 1;
+      System.out.println("Error: getCount ==> response is null.");
+    }
+    return maxExtent;
   }
 
   Tuple getFeaturesWithWhereClauseAndBoundingBoxAndTimeExtent(String where, String boundingBox, String timeExtent, boolean closeClient)  throws Exception {
@@ -503,7 +548,7 @@ public class FeatureService {
     totalCount++;
     try {
       String url = servicesUrl + serviceName + "/FeatureServer/0/query?" + queryParameters;
-      System.out.println(Thread.currentThread() + " <===> " +  url);
+      //System.out.println(Thread.currentThread() + " <===> " +  url);
       //long start = System.currentTimeMillis();
 
       // use Apache HttpClient

@@ -1,9 +1,6 @@
 package com.esri.arcgis.performance.test.mat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,9 +37,13 @@ public class FeatureServiceConcurrentTester2 {
         outStatistics = args[9];
       }
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName);
+      if (numThreads > 1) {
+        concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName);
+      } else {
+        sequentialTesting(servicesUrl, serviceName, numCalls, groupByFieldName, outStatistics, boundingBoxFileName, numSkips, timeoutInSeconds, outputFileName);
+      }
     } else {
-      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 <Services_Url> <Service_Name> <Number_Of_Threads> <Number_Of_Concurrent_Calls> <Path to bounding box file> <Number of lines to skip>  <Output File Name> " +
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester2 <Services_Url> <Service_Name> <Number_Of_Threads> <Number_Of_Concurrent_Calls> <Path to bounding box file> <Number of lines to skip>  <Output File Name> " +
               "{ <Timeout in seconds> <Group By field name> <Out Statistics>}");
       System.out.println("Sample:");
       System.out.println("   java -cp  ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1 https://us-iotdev.arcgis.com/fx1014a/maps/arcgis/rest/services/ " +
@@ -147,6 +148,52 @@ public class FeatureServiceConcurrentTester2 {
       }
       executor.shutdownNow();
       System.out.println("shutdown finished");
+    }
+  }
+
+
+  private static void sequentialTesting(String servicesUrl, String serviceName, int numCalls, String groupByFieldName,
+                                        String outStatistics, String boundingBoxFileName, int numSkips, int timeoutInSeconds, String outputFileName) {
+    try {
+      BufferedReader reader = new BufferedReader(new FileReader(boundingBoxFileName));
+      List<String> boundingBoxes = new LinkedList<>();
+      String box = reader.readLine();
+      while (box != null) {
+        String[] boxAndFeatures = box.split("\\|");
+        if (boxAndFeatures.length == 2 && numSkips <= 0) {
+          boundingBoxes.add(boxAndFeatures[0]);
+        }
+        box = reader.readLine();
+        numSkips--;
+      }
+      reader.close();
+      numCalls = Math.min(boundingBoxes.size(), numCalls);
+
+      BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
+      writer.write("RequestTime, Features, ErrorCode");
+      writer.newLine();
+
+      for (int index = 0; index < numCalls; index++) {
+        FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
+        String boundingBox = boundingBoxes.get(index);
+        try {
+          if (groupByFieldName != null & outStatistics != null) {
+            Tuple tuple = featureService.doGroupByStats("1=1", groupByFieldName, outStatistics, boundingBox, true);
+            writer.write(tuple.requestTime + "," + tuple.returnedFeatures + "," + tuple.errorCode);
+            writer.newLine();
+          } else {
+            Tuple tuple = featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326", boundingBox, true);
+            writer.write(tuple.requestTime + "," + tuple.returnedFeatures + "," + tuple.errorCode);
+            writer.newLine();
+          }
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+
+      writer.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
     }
   }
 

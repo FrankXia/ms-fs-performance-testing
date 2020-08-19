@@ -2,6 +2,7 @@ package com.esri.arcgis.performance.test.mat;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +40,11 @@ public class FeatureServiceConcurrentTester1a {
         returnCountOnly = Boolean.parseBoolean(args[8]);
       }
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numConcurrentCalls, boundingBox, timeoutInSeconds, outputFileName, returnCountOnly, outSR);
+      if (numThreads > 1) {
+        concurrentTesting(servicesUrl, serviceName, numThreads, numConcurrentCalls, boundingBox, timeoutInSeconds, outputFileName, returnCountOnly, outSR);
+      } else {
+        sequentialTesting(servicesUrl, serviceName, numConcurrentCalls, boundingBox, outSR, timeoutInSeconds, outputFileName,true, returnCountOnly);
+      }
     } else {
       System.out.println("Usage: java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.FeatureServiceConcurrentTester1a <Services_Url> <Service_Name> <# of Threads> <Number_Of_Concurrent Requests> <Output File Name> <Bounding Box>" +
               "{ <Output SR ID> <Timeout in seconds> <Return Count Only>}");
@@ -123,6 +128,35 @@ public class FeatureServiceConcurrentTester1a {
     }
 
     System.out.println("Elapsed time: " + (System.currentTimeMillis() - startTime));
+  }
+
+  private static void sequentialTesting(String servicesUrl, String serviceName, int numCalls, String boundingBox, String outSR, int timeoutInSeconds, String outputFileName, boolean closeClient, boolean returnCountOnly) {
+    try {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName));
+      writer.write("RequestTime, Features, ErrorCode");
+      writer.newLine();
+
+      for (int index = 0; index < numCalls; index++) {
+        FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
+        try {
+          if (returnCountOnly) {
+            Tuple tuple = featureService.getCount("1=1", boundingBox, true);
+            writer.write(tuple.requestTime + "," + tuple.returnedFeatures + "," + tuple.errorCode);
+            writer.newLine();
+          } else {
+            Tuple tuple = featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", outSR, boundingBox, closeClient);
+            writer.write(tuple.requestTime + "," + tuple.returnedFeatures + "," + tuple.errorCode);
+            writer.newLine();
+          }
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+
+      writer.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
   }
 
   private static void calculateStats(Stream<Tuple> results, int numbConcurrentCalls) {

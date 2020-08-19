@@ -39,7 +39,7 @@ public class MapServiceAggTester {
     Double[] times = new Double[numCalls];
     for (int index=0; index < numCalls; index++) {
       String boundingBox = Utils.getRandomBoundingBox(width, height);
-      Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle);
+      Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle, true);
       times[index] = tuple.requestTime * 1.0;
     }
     Utils.computeStats(times, numCalls);

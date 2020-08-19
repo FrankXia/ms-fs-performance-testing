@@ -4,30 +4,28 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import scala.Int;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 public class Utils {
 
   private static int executeMapExportRequestCount = 0;
 
   private  static DecimalFormat df = new DecimalFormat("#.#");
+  private  static DecimalFormat df0 = new DecimalFormat("#");
 
-  public static Tuple executeHttpGETRequest(CloseableHttpClient client, String url, String serviceName, boolean closeClient, String cookie) {
+  public static Tuple executeHttpGETRequest(CloseableHttpClient client, String url, boolean closeClient, String cookie, boolean showRequestUrl) {
 
     long start = System.currentTimeMillis();
     int errorCode = 0;
     try {
-      System.out.println(url);
+      if (showRequestUrl) System.out.println(url);
       String response = executeHttpGET(client, url, closeClient, cookie);
       if (response == null) {
         errorCode = 1;
@@ -35,7 +33,7 @@ public class Utils {
         errorCode = 2;
       }
 
-      System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName +  ", " + (executeMapExportRequestCount++));
+      //System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName +  ", " + (executeMapExportRequestCount++));
     } catch (Exception ex) {
       ex.printStackTrace();
       errorCode = 3;
@@ -47,13 +45,13 @@ public class Utils {
   static String executeHttpGET(CloseableHttpClient client, String url, boolean closeClient, String cookie) throws Exception {
     HttpGet request = new HttpGet(url);
     if (cookie != null) {
-      System.out.println("set cookie!");
+      //System.out.println("set cookie!");
       request.setHeader("Cookie", cookie);
     }
 
     CloseableHttpResponse response = client.execute(request);
     int responseCode = response.getStatusLine().getStatusCode();
-    System.out.println("Response Code : " + responseCode);
+    //System.out.println("Response Code : " + responseCode);
 
     String resultString = null;
     if (responseCode == 200) {
@@ -198,6 +196,8 @@ public class Utils {
   static void computeStats(Double[] data, int numberRequest) {
     df.setGroupingUsed(true);
     df.setGroupingSize(3);
+    df0.setGroupingUsed(true);
+    df0.setGroupingSize(3);
 
     Arrays.sort(data);
     double sum = 0;
@@ -212,14 +212,67 @@ public class Utils {
       if (stat > max) max = stat;
       squaredValue += stat * stat;
 
-      System.out.println(stat);
+//      System.out.println(stat);
     }
 
     double avg = sum / numberRequest;
     double std_dev = Math.sqrt( (squaredValue - numberRequest * avg * avg) / (numberRequest - 1) );
 
-    System.out.println("Total data points: " + numberRequest);
-    System.out.println("Average, min, max and std_dev: | " + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |");
+    System.out.println("Total request, average, min, max and std_dev: | " + df.format(numberRequest) +  " | "  + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |");
+  }
+
+  static void computeStats(List<Double> times, List<Integer> features, List<String> extents, String aggregationStyle) {
+    df.setGroupingUsed(true);
+    df.setGroupingSize(3);
+
+    double sumTimes = 0;
+    double minTimes = times.get(0);
+    double maxTimes = times.get(0);
+
+    double squaredValueTimes = 0.0;
+    for (int i= 1; i < times.size(); i++) {
+      double stat = times.get(i);
+      sumTimes += stat;
+      if (stat < minTimes) minTimes = stat;
+      if (stat > maxTimes) maxTimes = stat;
+      squaredValueTimes += stat * stat;
+    }
+
+    double avgTimes = sumTimes / times.size();
+    double std_devTimes = Math.sqrt( (squaredValueTimes - times.size() * avgTimes * avgTimes) / (times.size() - 1) );
+
+    double sumFeatures = 0;
+    double minFeatures = features.get(0);
+    double maxFeatures = features.get(0);
+    String minExtent = extents.get(0);
+    String maxExtent = extents.get(0);
+
+    double squaredValueFeatures = 0.0;
+    for (int i= 1; i < features.size(); i++) {
+      double stat = features.get(i);
+      sumFeatures += stat;
+      if (stat < minFeatures) {
+        minFeatures = stat;
+        minExtent = extents.get(i);
+      }
+      if (stat > maxFeatures) {
+        maxFeatures = stat;
+        maxExtent = extents.get(i);
+      }
+      squaredValueFeatures += stat * stat;
+    }
+
+    double avgFeatures = sumFeatures / features.size();
+    double std_devFeatures = Math.sqrt( (squaredValueFeatures - features.size() * avgFeatures * avgFeatures) / (features.size() - 1) );
+
+    System.out.println("Total requests: " + times.size() + ", aggregation style: " + aggregationStyle);
+    System.out.println("Min time extent: " + minExtent);
+    System.out.println("Max time extent: " + maxExtent);
+
+    System.out.println("| Total requests | Aggregation Style | Time avg(ms) | Time min | Time max | Time std_dev | Feature avg | Feature min | Feature max | Feature Time std_dev |");
+    System.out.println("|---------- |:----------- |:-------- |:----- |:----- |:----- |:---- |:---- |:----- | ----:|");
+    System.out.println("| " + times.size() + " | " +  aggregationStyle  + " | " +   df.format(avgTimes) +  " | " + df.format(minTimes) + " | " + df.format(maxTimes) + " | " + df.format(std_devTimes) + " | "
+            + df0.format(avgFeatures) +  " | " + df0.format(minFeatures) + " | " + df0.format(maxFeatures) + " | " + df0.format(std_devFeatures) + " |");
   }
 
   public static RequestConfig requestConfigWithTimeout(int timeoutInMilliseconds) {
@@ -228,5 +281,47 @@ public class Utils {
         .setConnectTimeout(timeoutInMilliseconds)
         .setConnectionRequestTimeout(timeoutInMilliseconds)
         .build();
+  }
+
+  public static void main(String[] args) {
+    if (args.length <= 0) {
+      System.out.println("Usage: java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.Utils <Output file name>");
+      System.exit(0);
+    }
+
+    try {
+      List<Double> times = new LinkedList<>();
+      List<Double> features = new LinkedList<>();
+
+      String fileName = args[0];
+      BufferedReader reader = new BufferedReader(new FileReader(fileName));
+      reader.readLine();
+      String aLine = reader.readLine();
+      while (aLine != null) {
+        String[] split = aLine.split("\t");
+        if (split.length == 3) {
+          double time = Double.parseDouble(split[0]);
+          int feature = Integer.parseInt(split[1]);
+          int code = Integer.parseInt(split[2]);
+          if (code == 0) {
+            times.add(time);
+            features.add(feature*1.0);
+          }
+        }
+        aLine = reader.readLine();
+      }
+      reader.close();
+
+      Double[] times2 = new Double[times.size()];
+      times2 = times.toArray(times2);
+      computeStats(times2, times.size());
+
+      Double[] features2 = new Double[features.size()];
+      features2 = features.toArray(features2);
+      computeStats(features2, times.size());
+
+    }catch (IOException ex) {
+      ex.printStackTrace();
+    }
   }
 }

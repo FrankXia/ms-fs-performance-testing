@@ -1,5 +1,6 @@
 package com.esri.arcgis.performance.test.mat;
 
+import com.esri.core.geometry.Envelope2D;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -14,10 +15,12 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
 public class MapService {
 
@@ -45,8 +48,15 @@ public class MapService {
     this.serviceName = serviceName;
     this.aggregationStyle = aggregationStyle;
     this.featureLimit = featureLimit;
+    this.timeoutInSeconds = timeoutInSeconds;
 
     try {
+      File cookieFile  = new File("./mat-access-cookie.txt");
+      long currentTimeMinus24Hours = (new Date()).getTime()  - 24 * 60 * 60 * 1000;
+      if (cookieFile.isFile() && (cookieFile.lastModified() - currentTimeMinus24Hours) > 0 ) {
+        System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old.");
+        System.exit(0);
+      }
       BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
       String line = reader.readLine();
       if (line != null) cookie = line;
@@ -136,12 +146,12 @@ public class MapService {
     this.timeoutInSeconds = timeoutInSeconds;
   }
 
-  public Tuple exportMap(String bbox, int bboxSR) {
+  public Tuple exportMap(String bbox, int bboxSR, boolean showRequestUrl) {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
 
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    return Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
+    return Utils.executeHttpGETRequest(httpClient, url, true, cookie, showRequestUrl);
   }
 
   private String getParameters() {
@@ -160,13 +170,22 @@ public class MapService {
     return  queryParameters.toString();
   }
 
-  public Tuple exportMap(String bbox, int bboxSR, String aggregationStyle) {
+  public Tuple exportMap(String bbox, int bboxSR, String aggregationStyle, boolean showRequestUrl) {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
     this.aggregationStyle = aggregationStyle;
 
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    return Utils.executeHttpGETRequest(httpClient, url, serviceName, true, cookie);
+    return Utils.executeHttpGETRequest(httpClient, url, true, cookie, showRequestUrl);
+  }
+
+  public Tuple exportMap(String bbox, int bboxSR, boolean closeClient, String aggregationStyle, boolean showRequestUrl) {
+    this.bbox = bbox;
+    this.bboxSR = bboxSR;
+    this.aggregationStyle = aggregationStyle;
+
+    String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
+    return Utils.executeHttpGETRequest(httpClient, url, closeClient, cookie, showRequestUrl);
   }
 
   private String createDynamicLayers(int featureLimit, String layerName) {
@@ -187,6 +206,11 @@ public class MapService {
   Tuple getCount(String where, String boundingBox) {
     FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
     return featureService.getCount(where, boundingBox, true);
+  }
+
+  Envelope2D getMaxExtent() {
+    FeatureService featureService = new FeatureService(servicesUrl, serviceName, timeoutInSeconds, true);
+    return featureService.getExtent(true);
   }
 
 }

@@ -39,7 +39,7 @@ public class MapServiceAggConcurrentTester1 {
       }
 
       if (numCalls == 1) {
-        singleTesting(servicesUrl, serviceName, width, height, aggStyle, timeoutInSeconds, aggStyle, featureLimit);
+        singleTesting(servicesUrl, serviceName, width, height, aggStyle, timeoutInSeconds, aggStyle, featureLimit, true);
       } else {
         concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, width, height, aggStyle, timeoutInSeconds, aggStyle, outputFile, featureLimit);
       }
@@ -49,17 +49,17 @@ public class MapServiceAggConcurrentTester1 {
     }
   }
 
-  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds, String aggregationStyle, int featureLimit) {
+  private static void singleTesting(String servicesUrl, String serviceName, int width, int height, String aggStyle, int timeoutInSeconds, String aggregationStyle, int featureLimit, boolean showRequestUrl) {
     String boundingBox = Utils.getRandomBoundingBox(width, height);
     MapService mapService = new MapService(servicesUrl, serviceName,timeoutInSeconds, aggregationStyle, featureLimit);
-    Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle);
+    Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle, showRequestUrl);
     System.out.println( "Time -> " + tuple.requestTime);
   }
 
   private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, String aggStyle, int timeoutInSeconds, String aggregationStyle, int featureLimit) {
     Callable<Tuple> task = () -> {
       MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
-      return mapService.exportMap(boundingBox, 4326, aggStyle);
+      return mapService.exportMap(boundingBox, 4326, aggStyle, true);
     };
     return task;
   }
@@ -111,7 +111,7 @@ public class MapServiceAggConcurrentTester1 {
                 });
         writer.close();
       } else {
-        doStats(results);
+        doStats(results, aggStyle);
       }
 
     }catch (Exception ex) {
@@ -137,7 +137,7 @@ public class MapServiceAggConcurrentTester1 {
     System.out.println("Total time: " + (System.currentTimeMillis() - start) + " ms");
   }
 
-  private static void doStats(Stream<Tuple> results) {
+  private static void doStats(Stream<Tuple> results, String aggStyle) {
     DecimalFormat df = new DecimalFormat("#.#");
 
     final List<Long> times = new LinkedList<>();
@@ -159,7 +159,7 @@ public class MapServiceAggConcurrentTester1 {
 
     double avgTime = timeTotal / times.size();
     double stdDevTimes = Math.sqrt( (squaredTimes - times.size() * avgTime * avgTime) / (times.size() - 1) );
-    System.out.println( "Time -> average, min, max, and standard deviation over " + times.size() +  " requests: | " +  df.format(avgTime) + " | " + df.format(minTime) + " | " + df.format(maxTime)  + " | " + df.format(stdDevTimes) + " | ");
+    System.out.println(aggStyle + " => Time -> average, min, max, and standard deviation over " + times.size() +  " requests: | " +  df.format(avgTime) + " | " + df.format(minTime) + " | " + df.format(maxTime)  + " | " + df.format(stdDevTimes) + " | ");
 
   }
 

@@ -27,7 +27,7 @@ public class MapServiceTester {
 
   private static void testExportMap(String servicesUrl, String serviceName, String boundingBox, String aggregationStyle) {
     MapService mapService = new MapService(servicesUrl, serviceName, 100, aggregationStyle, 100);
-    mapService.exportMap(boundingBox, 4326);
+    mapService.exportMap(boundingBox, 4326, true);
   }
 
   private static void testAll() {
@@ -48,7 +48,7 @@ public class MapServiceTester {
     for (int index =0; index < serviceNames.length; index++) {
       String name = serviceNames[index];
       MapService mapService = new MapService(servicesUrl, name, 100, "square", 1000);
-      mapService.exportMap(bboxes[index], 4326);
+      mapService.exportMap(bboxes[index], 4326, true);
     }
   }
 }

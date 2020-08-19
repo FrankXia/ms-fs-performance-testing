@@ -46,7 +46,7 @@ public class MapServiceAggConcurrentTester2 {
   private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, String aggregationStyle, long numFeatures, int featureLimit) {
     Callable<Tuple> task = () -> {
       MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
-      Tuple tuple = mapService.exportMap(boundingBox, 4326);
+      Tuple tuple = mapService.exportMap(boundingBox, 4326, true);
       tuple.returnedFeatures = numFeatures;
       return tuple;
     };
