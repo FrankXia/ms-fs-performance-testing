@@ -8,7 +8,8 @@ docs/
 results-data/*
 results-data/dataset-1m
 results-data/dataset-10k
-
+scripts/sst/*
+scripts/logs/*
 # Eclipse
 .project
 .metadata
