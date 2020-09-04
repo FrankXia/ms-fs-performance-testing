@@ -24,7 +24,7 @@ public class StreamServiceTester implements ReconnectListener {
             System.exit(0);
         }
 
-//        String streamServiceUrl = "wss://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/streams/arcgis/ws/services/ais_josn_1_sst/StreamServer/subscribe?token=bumsTmEzXyRsxeRGHqtdDYCUhOfpPXK4CKD-5z0RxDHTehyDJQxHVPgJjpm2Su798R1Pn-3H4bbFqiIJInoaAaBFutQ98dndwraahs8CuNC7mtsnZf9t9MIcQAnkY9jKYaQA9RgJOFyLYHcIcidibGSi92jMV-9dJQYiVuUonGpQLKgca01q3K3FTrT3eX5A7N1R-qmNkvEO6JJX5ABJluTPRoKmqfrNAmXtyNWzImg.";
+//        String streamServiceUrl = "wss://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/streams/arcgis/ws/services/ais_josn_1_sst/StreamServer/assribe?token=bumsTmEzXyRsxeRGHqtdDYCUhOfpPXK4CKD-5z0RxDHTehyDJQxHVPgJjpm2Su798R1Pn-3H4bbFqiIJInoaAaBFutQ98dndwraahs8CuNC7mtsnZf9t9MIcQAnkY9jKYaQA9RgJOFyLYHcIcidibGSi92jMV-9dJQYiVuUonGpQLKgca01q3K3FTrT3eX5A7N1R-qmNkvEO6JJX5ABJluTPRoKmqfrNAmXtyNWzImg.";
 //        String streamServiceUrl = "wss://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/streams/arcgis/ws/services/ais_josn_250_sst/StreamServer/subscribe?token=bumsTmEzXyRsxeRGHqtdDYCUhOfpPXK4CKD-5z0RxDHTehyDJQxHVPgJjpm2Su798R1Pn-3H4bbFqiIJInoaAaBFutQ98dndwraahs8CuNC7mtsnZf9t9MIcQAnkY9jKYaQA9RgJOFyLYHcIcidibGSi92jMV-9dJQYiVuUonGpQLKgca01q3K3FTrT3eX5A7N1R-qmNkvEO6JJX5ABJluTPRoKmqfrNAmXtyNWzImg.";
         String streamServiceUrl = "wss://us-iotdev.arcgis.com/dev0420a3/cqvgkj9zrnkn9bcu/streams/arcgis/ws/services/ais_json_250_sst/StreamServer/";
 
@@ -51,7 +51,7 @@ public class StreamServiceTester implements ReconnectListener {
         // read token from disk
         String token = null;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("./sst-access-token.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("sst-access-token.txt"));
             String line = reader.readLine();
             if (line != null) token = line;
             else System.err.println("Error in reading required 'token' string.");
@@ -90,13 +90,31 @@ public class StreamServiceTester implements ReconnectListener {
                 System.out.println("starting shutdown .... ");
                 System.out.println("===============================");
                 int totalFailed = 0;
-                System.out.println("Thead Id, Total Msg, Total Bytes");
+
+                System.out.println("Thread Id, Total Msg, Total Bytes");
+                double sumOfThroughput = 0;
+                double sumOfRequestByteRate = 0;
+                double minThroughput = 0;
+                double maxThroughput = 0;
                 for (WebSocketClientWrapper client : clientList) {
                     Tuple tuple = client.close();
                     System.out.println(tuple.threadId + ", " +  tuple.messageTotal +", " + tuple.messageTotalBytes);
-                    if (tuple.messageTotalBytes == 0 || tuple.messageTotal == 0) totalFailed++;
+                    if (tuple.messageTotalBytes == 0 || tuple.messageTotal == 0)
+                        totalFailed++;
+                    else {
+                        double currentThroughput = (tuple.messageTotalBytes / timeoutInSeconds) / 1000;
+                        double currentRequesteDataRate =  tuple.messageTotalBytes / tuple.messageTotal;
+                        if (minThroughput == 0 || minThroughput > currentThroughput) minThroughput = currentThroughput;
+                        if (maxThroughput == 0 || maxThroughput < currentThroughput) maxThroughput = currentThroughput;
+                        sumOfRequestByteRate += currentRequesteDataRate;
+                        sumOfThroughput+=currentThroughput;
+                    }
                 }
                 System.out.println("-------------------------------");
+                System.out.println("min throughput: " + minThroughput + "kb/s");
+                System.out.println("max throughput: " + maxThroughput + "kb/s");
+                System.out.println("avg throughput: " + sumOfThroughput / (clientList.size() - totalFailed) + "kb/s");
+                System.out.println("avg request rate: " + sumOfRequestByteRate/ (clientList.size() - totalFailed) + "bytes/s");
                 System.out.println("total connections: " + clientList.size() + ", failed: " + totalFailed + ", rate: " + nf.format((totalFailed * 1.0/clientList.size()) * 100) + "%");
                 System.out.println("=============================== total failed connections: " + totalFailedConnections);
                 System.exit(0);
