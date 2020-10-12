@@ -26,12 +26,12 @@ public class AggregationTester {
     private String outputFolder = "./";
 
     public static void main(String[] args ) {
-        handleAggregations(args);
+        testingAggregations(args);
 //        compareAggregationResults();
     }
 
     // get testing results
-    static void handleAggregations(String[] args) {
+    static void testingAggregations(String[] args) {
         if (args.length < 2) {
             System.out.println("Usage: java -cp ./target/ms-fs-performance-test-1.0.jar com.esri.arcgis.performance.test.es.AggregationTester <service name> <save output> {<output folder>}");
             System.exit(0);
@@ -53,9 +53,10 @@ public class AggregationTester {
             aggregationTester.compareTriangleGridAggregations(lod, saveOutput);
         }
 
-//        for (int lod = minLod; lod < maxLod; lod++) {
-//            aggregationTester.compareSquareGridAggregations(lod, saveOutput);
-//        }
+        // to compare StringSquareGrid and LongSquareGrid, one needs to setup the square aggregation style lod more than 31.
+        for (int lod = minLod; lod < maxLod; lod++) {
+            aggregationTester.compareSquareGridAggregations(lod, saveOutput);
+        }
 
         for (int lod = minLod; lod < maxLod; lod++) {
             aggregationTester.compareHexagonGridAggregations(lod, saveOutput);
@@ -96,9 +97,24 @@ public class AggregationTester {
                 }
             }
         }
-        System.out.println("String and long hexagon grid aggregations are identical? " + (identicalCount != 0 && identicalCount == stringBuckets.size()));
-        System.out.println("String-long and long hexagon grid aggregations are identical? " + (identicalCount2 != 0 && identicalCount2 == stringLongBuckets.size()));
-        System.out.println("String-long and string hexagon grid aggregations are identical? " + (identicalCount3 != 0 && identicalCount3 == stringLongBuckets.size()));
+        boolean isIdentical = (identicalCount != 0 && identicalCount == stringBuckets.size());
+        if  (isIdentical)
+            System.out.println("String and long hexagon grid aggregations are identical? " + isIdentical);
+        else
+            System.err.println("String and long hexagon grid aggregations are identical? " + isIdentical);
+
+        boolean isIdentical2 =  (identicalCount2 != 0 && identicalCount2 == stringLongBuckets.size());
+        if  (isIdentical2)
+            System.out.println("String-long and long hexagon grid aggregations are identical? " + isIdentical2);
+        else
+            System.err.println("String-long and long hexagon grid aggregations are identical? " + isIdentical2);
+
+        boolean isIdentical3 = (identicalCount3 != 0 && identicalCount3 == stringLongBuckets.size());
+        if  (isIdentical3)
+            System.out.println("String-long and string hexagon grid aggregations are identical? " + isIdentical3);
+        else
+            System.err.println("String-long and string hexagon grid aggregations are identical? " + isIdentical3);
+
         System.out.println( stringBuckets.size() +  " --------------------------------------------------------------- " + lod);
     }
     private void compareTriangleGridAggregations(int lod, boolean save) {
@@ -112,7 +128,11 @@ public class AggregationTester {
                 }
             }
         }
-        System.out.println("String and long triangle grid aggregations are identical? " + (identicalCount != 0 && identicalCount == stringBuckets.size()));
+        boolean isIdentical = (identicalCount != 0 && identicalCount == stringBuckets.size());
+        if  (isIdentical)
+            System.out.println("String and long triangle grid aggregations are identical? " + isIdentical);
+        else
+            System.err.println("String and long triangle grid aggregations are identical? " + isIdentical);
         System.out.println( stringBuckets.size() +  " --------------------------------------------------------------- " + lod);
     }
     private void compareSquareGridAggregations(int lod, boolean save) {
@@ -126,7 +146,12 @@ public class AggregationTester {
                 }
             }
         }
-        System.out.println("String and long square grid aggregations are identical? " + (identicalCount != 0 && identicalCount == stringBuckets.size()));
+        boolean isIdentical = (identicalCount != 0 && identicalCount == stringBuckets.size());
+        if  (isIdentical)
+            System.out.println("String and long square grid aggregations are identical? " + isIdentical);
+        else
+            System.err.println("String and long square grid aggregations are identical? " + isIdentical);
+
         System.out.println( stringBuckets.size() +  " --------------------------------------------------------------- " + lod);
     }
 
