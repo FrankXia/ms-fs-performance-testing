@@ -51,3 +51,8 @@ mat-deployment.yaml
 mat-patch-deployment.json
 summary-same-extent.csv
 /results-data/
+./current-es-730
+./fixed-es-730
+./fixed-es-730a
+./fixed-es-792
+
