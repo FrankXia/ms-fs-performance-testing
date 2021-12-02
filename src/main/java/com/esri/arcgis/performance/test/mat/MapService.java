@@ -41,7 +41,10 @@ public class MapService {
   private String serviceName;
   private String servicesUrl;
   private int timeoutInSeconds = 60; // seconds
-  private String cookie = "";
+  private String cookieOrToken = "";
+  private String cookieFile = null; // "./mat-access-cookie.txt";
+  private String tokenFile = "./velocity_access_token.txt";
+  private boolean useCookie = false;
 
   public MapService(String servicesUrl, String serviceName, int timeoutInSeconds, String aggregationStyle, int featureLimit) {
     this.servicesUrl = servicesUrl.endsWith("/")? servicesUrl : servicesUrl + "/";
@@ -50,16 +53,20 @@ public class MapService {
     this.featureLimit = featureLimit;
     this.timeoutInSeconds = timeoutInSeconds;
 
+    useCookie = cookieFile != null;
     try {
-      File cookieFile  = new File("./mat-access-cookie.txt");
-      long currentTimeMinus24Hours = (new Date()).getTime()  - 24 * 60 * 60 * 1000;
-      if (cookieFile.isFile() && (cookieFile.lastModified() - currentTimeMinus24Hours) > 0 ) {
-        System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old.");
+      String cookieOrTokenFile = cookieFile==null?tokenFile:cookieFile;
+      File cookieFile  = new File(cookieOrTokenFile);
+      long currentTimeMinus24Hours = 24 * 60 * 60 * 1000;
+      if (cookieFile.isFile() && ( (new Date()).getTime()  - cookieFile.lastModified() > currentTimeMinus24Hours) ) {
+        System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old in MapService.");
         System.exit(0);
       }
-      BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
+      BufferedReader reader = new BufferedReader(new FileReader(cookieOrTokenFile));
       String line = reader.readLine();
-      if (line != null) cookie = line;
+      if (line != null) {
+          cookieOrToken = line;
+      }
       else System.err.println("Error in reading required 'Cookie' string.");
     } catch (Exception ex) {
       System.err.println("Error in reading required 'Cookie' string.");
@@ -70,8 +77,6 @@ public class MapService {
   }
 
   private void createClient() {
-    // cut it from browser
-
     RequestConfig.Builder requestBuilder = RequestConfig.custom();
     requestBuilder.setConnectTimeout(timeoutInSeconds * 1000);
     requestBuilder.setSocketTimeout(timeoutInSeconds * 1000);
@@ -149,9 +154,9 @@ public class MapService {
   public Tuple exportMap(String bbox, int bboxSR, boolean showRequestUrl) {
     this.bbox = bbox;
     this.bboxSR = bboxSR;
-
+    CloseableHttpClient client =  httpClient;
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    return Utils.executeHttpGETRequest(httpClient, url, true, cookie, showRequestUrl);
+    return Utils.executeHttpGETRequest(client, url, false, useCookie?cookieOrToken:null, showRequestUrl);
   }
 
   private String getParameters() {
@@ -161,12 +166,16 @@ public class MapService {
     queryParameters.append("dpi=").append(dpi);
     queryParameters.append("&transparent=").append(transparent);
     queryParameters.append("&format=").append(format);
-    queryParameters.append("&dynamicLayers=").append(URLEncoder.encode(dynamicLayers));
+    queryParameters.append("&layers=show%3A0");
+    // queryParameters.append("&dynamicLayers=").append(URLEncoder.encode(dynamicLayers));
     queryParameters.append("&bbox=").append(URLEncoder.encode(bbox));
     queryParameters.append("&bboxSR=").append(bboxSR);
     queryParameters.append("&imageSR=").append(imageSR);
     queryParameters.append("&size=").append(URLEncoder.encode(sizeString));
     queryParameters.append("&f=").append(f);
+    if (!useCookie) {
+      queryParameters.append("&").append(cookieOrToken);
+    }
     return  queryParameters.toString();
   }
 
@@ -176,7 +185,7 @@ public class MapService {
     this.aggregationStyle = aggregationStyle;
 
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    return Utils.executeHttpGETRequest(httpClient, url, true, cookie, showRequestUrl);
+    return Utils.executeHttpGETRequest(httpClient, url, true, useCookie?cookieOrToken:null, showRequestUrl);
   }
 
   public Tuple exportMap(String bbox, int bboxSR, boolean closeClient, String aggregationStyle, boolean showRequestUrl) {
@@ -185,7 +194,7 @@ public class MapService {
     this.aggregationStyle = aggregationStyle;
 
     String url = servicesUrl + serviceName + "/MapServer/export?" + getParameters();
-    return Utils.executeHttpGETRequest(httpClient, url, closeClient, cookie, showRequestUrl);
+    return Utils.executeHttpGETRequest(httpClient, url, closeClient, useCookie?cookieOrToken:null, showRequestUrl);
   }
 
   private String createDynamicLayers(int featureLimit, String layerName) {

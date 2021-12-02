@@ -186,8 +186,8 @@ public class CalculateStats {
             index++;
           }
 
-          Utils.computeStats(times, numberRequests);
-          Utils.computeStats(features, numberRequests);
+          Utils.computeStats(times, numberRequests, 1);
+          Utils.computeStats(features, numberRequests, 0);
         }
       } else {
         System.out.println("File '" + fileName + "' does not exist!");

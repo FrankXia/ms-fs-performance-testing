@@ -4,7 +4,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import scala.Int;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -17,7 +16,7 @@ public class Utils {
 
   private static int executeMapExportRequestCount = 0;
 
-  private  static DecimalFormat df = new DecimalFormat("#.#");
+  private  static DecimalFormat df1 = new DecimalFormat("#.#");
   private  static DecimalFormat df0 = new DecimalFormat("#");
 
   public static Tuple executeHttpGETRequest(CloseableHttpClient client, String url, boolean closeClient, String cookie, boolean showRequestUrl) {
@@ -27,6 +26,7 @@ public class Utils {
     try {
       if (showRequestUrl) System.out.println(url);
       String response = executeHttpGET(client, url, closeClient, cookie);
+      //System.out.println(response);
       if (response == null) {
         errorCode = 1;
       } else if (response.equals("503") || response.equals("504")) {
@@ -51,7 +51,7 @@ public class Utils {
 
     CloseableHttpResponse response = client.execute(request);
     int responseCode = response.getStatusLine().getStatusCode();
-    //System.out.println("Response Code : " + responseCode);
+    System.out.println("Response Code : " + responseCode);
 
     String resultString = null;
     if (responseCode == 200) {
@@ -193,9 +193,9 @@ public class Utils {
   }
 
 
-  static void computeStats(Double[] data, int numberRequest) {
-    df.setGroupingUsed(true);
-    df.setGroupingSize(3);
+  static String computeStats(Double[] data, int numberRequest, int numbDecimals) {
+    df1.setGroupingUsed(true);
+    df1.setGroupingSize(3);
     df0.setGroupingUsed(true);
     df0.setGroupingSize(3);
 
@@ -218,12 +218,18 @@ public class Utils {
     double avg = sum / numberRequest;
     double std_dev = Math.sqrt( (squaredValue - numberRequest * avg * avg) / (numberRequest - 1) );
 
-    System.out.println("Total request, average, min, max and std_dev: | " + df.format(numberRequest) +  " | "  + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |");
+    // String statsString = "| " + df.format(numberRequest) +  " | "  + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |";
+    String statsString = (numbDecimals == 1) ? (df1.format(avg) +  " | " + df1.format(min) + " | " + df1.format(max) + " | " + df1.format(std_dev)) :
+            (df0.format(avg) +  " | " + df0.format(min) + " | " + df0.format(max) + " | " + df0.format(std_dev));
+
+    // System.out.println("Total request, average, min, max and std_dev: | " + df.format(numberRequest) +  " | "  + df.format(avg) +  " | " + df.format(min) + " | " + df.format(max) + " | " + df.format(std_dev) + " |");
+    // System.out.println(statsString);
+    return statsString;
   }
 
   static void computeStats(List<Double> times, List<Integer> features, List<String> extents, String aggregationStyle) {
-    df.setGroupingUsed(true);
-    df.setGroupingSize(3);
+    df1.setGroupingUsed(true);
+    df1.setGroupingSize(3);
 
     double sumTimes = 0;
     double minTimes = times.get(0);
@@ -271,7 +277,7 @@ public class Utils {
 
     System.out.println("| Total requests | Aggregation Style | Time avg(ms) | Time min | Time max | Time std_dev | Feature avg | Feature min | Feature max | Feature Time std_dev |");
     System.out.println("|---------- |:----------- |:-------- |:----- |:----- |:----- |:---- |:---- |:----- | ----:|");
-    System.out.println("| " + times.size() + " | " +  aggregationStyle  + " | " +   df.format(avgTimes) +  " | " + df.format(minTimes) + " | " + df.format(maxTimes) + " | " + df.format(std_devTimes) + " | "
+    System.out.println("| " + times.size() + " | " +  aggregationStyle  + " | " +   df1.format(avgTimes) +  " | " + df1.format(minTimes) + " | " + df1.format(maxTimes) + " | " + df1.format(std_devTimes) + " | "
             + df0.format(avgFeatures) +  " | " + df0.format(minFeatures) + " | " + df0.format(maxFeatures) + " | " + df0.format(std_devFeatures) + " |");
   }
 
@@ -282,6 +288,66 @@ public class Utils {
         .setConnectionRequestTimeout(timeoutInMilliseconds)
         .build();
   }
+
+
+
+  public static List<String> getPreGeneratedRandomExtents(String extentFileFolder, String datasetSize, int lines2Skip, int numTests)
+          throws Exception
+  {
+    String[] fileNames = getExtentsFiles(datasetSize);
+    int line2ReadForEachFile = numTests / fileNames.length;
+    List<String> extents = new LinkedList<>();
+    for (int i=0; i < fileNames.length; i++) {
+      String bboxFileName = extentFileFolder + "/" + fileNames[i];
+      BufferedReader reader = new BufferedReader(new FileReader(bboxFileName));
+      int startIndex = lines2Skip;
+      if (startIndex < 0) startIndex = -1 * startIndex;
+      while (startIndex > 0) {
+        reader.readLine();
+        startIndex--;
+      }
+      for (int index = 0; index  < line2ReadForEachFile; index++) {
+        String line = reader.readLine();
+        if (line != null) extents.add(line);
+      }
+      reader.close();
+    }
+
+    return extents;
+  }
+
+  private static String[] getExtentsFiles(String dataSetSize) {
+    if (dataSetSize.equals("100k")) {
+      return new String[] {
+              "100k_extents_50k_60k_features.txt",
+              "100k_extents_60k_70k_features.txt",
+              "100k_extents_70k_80k_features.txt",
+              "100k_extents_80k_90k_features.txt",
+              "100k_extents_90k_100k_features.txt"
+      };
+    }
+    if (dataSetSize.equals("1m")) {
+      return new String[] {
+              "1m_extents_500k_600k_features.txt",
+              "1m_extents_600k_700k_features.txt",
+              "1m_extents_700k_800k_features.txt",
+              "1m_extents_800k_900k_features.txt",
+              "1m_extents_900k_1m_features.txt"
+      };
+    }
+    if (dataSetSize.equals("10m")) {
+      return new String[] {
+              "10m_extents_5m_6m_features.txt",
+              "10m_extents_6m_7m_features.txt",
+              "10m_extents_7m_8m_features.txt",
+              "10m_extents_8m_9m_features.txt",
+              "10m_extents_9m_10m_features.txt"
+      };
+    }
+
+    return new String[1];
+  }
+
 
   public static void main(String[] args) {
     if (args.length <= 0) {
@@ -314,11 +380,11 @@ public class Utils {
 
       Double[] times2 = new Double[times.size()];
       times2 = times.toArray(times2);
-      computeStats(times2, times.size());
+      computeStats(times2, times.size(), 1);
 
       Double[] features2 = new Double[features.size()];
       features2 = features.toArray(features2);
-      computeStats(features2, times.size());
+      computeStats(features2, times.size(), 0);
 
     }catch (IOException ex) {
       ex.printStackTrace();

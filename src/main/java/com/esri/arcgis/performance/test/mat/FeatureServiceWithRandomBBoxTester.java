@@ -2,9 +2,13 @@ package com.esri.arcgis.performance.test.mat;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.DecimalFormat;
 import java.util.Random;
 
 public class FeatureServiceWithRandomBBoxTester {
+
+  private  static DecimalFormat df1 = new DecimalFormat("#.#");
+  private  static DecimalFormat df0 = new DecimalFormat("#");
 
   public static void main(String[] args) throws Exception {
     if (args.length < 4) {
@@ -28,7 +32,13 @@ public class FeatureServiceWithRandomBBoxTester {
 
   private static void testGetFeaturesWithBoundingBox(String servicesUrl, String tableName, String boundingBoxFileName,
                                                      int numbTests, int timeoutInSeconds, int startingEntry) throws Exception {
-    System.out.println("======== get features from each service with a random bounding box that contains less than 10k features ========= bbox file => " + boundingBoxFileName + ", # of tests => " + numbTests + ", timeout => " + timeoutInSeconds);
+    System.out.println("======== get features from each service with a random bounding box that contains less than 10k features ========= bbox file => "
+            + boundingBoxFileName + ", # of tests => " + numbTests + ", timeout => " + timeoutInSeconds);
+    df0.setGroupingUsed(true);
+    df0.setGroupingSize(3);
+    df1.setGroupingUsed(true);
+    df1.setGroupingSize(3);
+
     FeatureService featureService = new FeatureService(servicesUrl, tableName, timeoutInSeconds, true);
     BufferedReader reader = new BufferedReader(new FileReader(boundingBoxFileName));
     int modNumber = (numbTests < 150) ? 100 : (250 - numbTests);
@@ -40,15 +50,23 @@ public class FeatureServiceWithRandomBBoxTester {
       startIndex--;
     }
 
-    Double[] data = new Double[numbTests];
+    double totalFeatures = 0;
+    Double[] features = new Double[numbTests];
+    Double[] times = new Double[numbTests];
     for (int index = 0; index  < numbTests; index++) {
       long start = System.currentTimeMillis();
       String aLine = reader.readLine();
       System.out.println(index + " => " +  aLine);
       String boundingBox = aLine.split("[|]")[0];
       featureService.getFeaturesWithWhereClauseAndBoundingBox("1=1", "4326", boundingBox, false);
-      data[index] = (System.currentTimeMillis() - start) * 1.0;
+      times[index] = (System.currentTimeMillis() - start) * 1.0;
+      features[index] = Double.parseDouble(aLine.split("[|]")[1]);
+      totalFeatures += features[index];
     }
-    Utils.computeStats(data, numbTests);
+
+    String avgFeatures = df0.format(totalFeatures/numbTests);
+    System.out.println("| avg features | avg (ms) | min (ms) | max (ms) | std_dev (ms) | avg (fs) | min (fs) | max (fs) | std dev (fs) | ");
+    System.out.print("| " + avgFeatures + " | " + Utils.computeStats(times, numbTests, 1));
+    System.out.println(" | " + Utils.computeStats(features, numbTests, 0) + " |");
   }
 }

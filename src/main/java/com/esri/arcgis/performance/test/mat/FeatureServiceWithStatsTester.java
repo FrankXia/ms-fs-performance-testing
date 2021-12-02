@@ -53,7 +53,7 @@ public class FeatureServiceWithStatsTester {
         stats[i] = tuple.requestTime * 1.0;
       }
 
-      Utils.computeStats(stats, numRuns);
+      Utils.computeStats(stats, numRuns, 1);
     }
   }
 }

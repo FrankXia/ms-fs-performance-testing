@@ -1,6 +1,5 @@
 package com.esri.arcgis.performance.test.mat;
 
-import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Envelope2D;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -83,28 +82,34 @@ public class FeatureService {
   private String f = "json";
 
   private int timeoutInSeconds = 60;
-  private String cookie = null;
+  private String cookieOrToken = null;
 
   private static int errorCount = 0;
   private static int totalCount = 0;
+  private static String tokenFile = "./velocity_access_token.txt";
+  private static String cookieFile = null; // "./mat-access-cookie.txt";
+  private boolean useCookie = false;
 
-  FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds, boolean requireCookie) {
+  FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds, boolean requireCookieToken) {
     this.serviceName = serviceName;
     this.servicesUrl = servicesUrl.endsWith("/") ? servicesUrl : servicesUrl + "/";
     this.outFields = "*";
 
-    if (requireCookie) {
+    if (requireCookieToken) {
       try {
-        File cookieFile  = new File("./mat-access-cookie.txt");
+        useCookie = cookieFile != null;
+        String cookieOrTokenFile = cookieFile==null?tokenFile:cookieFile;
+        File cookieFile  = new File(cookieOrTokenFile);
         long currentTimeMinus24Hours = (new Date()).getTime()  - 24 * 60 * 60 * 1000;
-        if (cookieFile.isFile() && (cookieFile.lastModified() - currentTimeMinus24Hours) > 0 ) {
-          System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old.");
+        if (cookieFile.isFile() && ( (new Date()).getTime()  - cookieFile.lastModified() > currentTimeMinus24Hours) ) {
+          System.err.println(cookieFile.lastModified());
+          System.err.println("The required 'Cookie' file, " + cookieFile.getAbsolutePath() + " is more than 24 hour old in FeatureService.");
           System.exit(0);
         }
 
-        BufferedReader reader = new BufferedReader(new FileReader("./mat-access-cookie.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader(cookieOrTokenFile));
         String line = reader.readLine();
-        if (line != null) cookie = line;
+        if (line != null) cookieOrToken = line;
         else System.err.println("Error in reading required 'Cookie' string.");
         reader.close();
       } catch (Exception ex) {
@@ -119,7 +124,7 @@ public class FeatureService {
 
   private void createClient() {
     try {
-      if (cookie == null) {
+      if (cookieOrToken == null) {
         // use the TrustSelfSignedStrategy to allow Self Signed Certificates
 //        SSLContext sslContext = SSLContextBuilder
 //                .create()
@@ -358,6 +363,18 @@ public class FeatureService {
     return getFeatures(true, closeClient);
   }
 
+  Tuple getAggregationWithWhereClauseAndBoundingBox(String where, String boundingBox, String bboxSR, int lod, String lodSR, String aggStyle, boolean closeClient)  throws Exception {
+    resetParameters2InitialValues();
+    this.where = where == null? "" : where.trim();
+    this.geometry = boundingBox;
+    this.inSR = bboxSR;
+    this.lod = lod + "";
+    this.lodSR = lodSR;
+    this.lodType = aggStyle;
+    this.outSR = lodSR;
+    return getFeatures(false, closeClient);
+  }
+
   Tuple getFeaturesWithWhereClauseAndRandomOffset(String where, boolean takeOffset, boolean closeClient)  throws Exception {
     resetParameters2InitialValues();
     this.where = where == null? "" : where.trim();
@@ -498,6 +515,9 @@ public class FeatureService {
     request.append("&returnClusters=").append(returnClusters);
     request.append("&returnFullLodGrid=").append(returnFullLodGrid);
     request.append("&f=").append(f);
+    if (!useCookie) {
+      request.append("&").append(cookieOrToken);
+    }
 
     return request.toString();
   }
@@ -552,7 +572,7 @@ public class FeatureService {
       //long start = System.currentTimeMillis();
 
       // use Apache HttpClient
-      String result = Utils.executeHttpGET(client, url, closeClient, cookie);
+      String result = Utils.executeHttpGET(client, url, closeClient, cookieOrToken);
       // use simple http client
 //      String result = Utils.executeHttpsSimpleGET(url, cookie);
 

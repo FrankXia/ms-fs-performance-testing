@@ -179,7 +179,7 @@ public class FeatureServiceWithoutStatsTester {
           stats[i] = tuple.requestTime * 1.0;
         }
       }
-      Utils.computeStats(stats, numRuns * tableNames.length);
+      Utils.computeStats(stats, numRuns * tableNames.length, 1);
     }catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -204,7 +204,7 @@ public class FeatureServiceWithoutStatsTester {
           stats[i] = tuple.requestTime * 1.0;
         }
       }
-      Utils.computeStats(stats, numRuns * tableNames.length);
+      Utils.computeStats(stats, numRuns * tableNames.length, 1);
     }catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -226,7 +226,7 @@ public class FeatureServiceWithoutStatsTester {
           stats[i] = tuple.requestTime * 1.0;
         }
       }
-      Utils.computeStats(stats, numRuns * tableNames.length);
+      Utils.computeStats(stats, numRuns * tableNames.length, 1);
     }catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -248,7 +248,7 @@ public class FeatureServiceWithoutStatsTester {
           stats[i] = tuple.requestTime * 1.0;
         }
       }
-      Utils.computeStats(stats, numRuns * tableNames.length);
+      Utils.computeStats(stats, numRuns * tableNames.length, 1);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -271,7 +271,7 @@ public class FeatureServiceWithoutStatsTester {
           stats[i] = tuple.requestTime * 1.0;
         }
       }
-      Utils.computeStats(stats, numRuns * tableNames.length);
+      Utils.computeStats(stats, numRuns * tableNames.length, 1);
     }catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -294,7 +294,7 @@ public class FeatureServiceWithoutStatsTester {
         stats[i] = tuple.requestTime * 1.0;
       }
     }
-    Utils.computeStats(stats, numRuns * tableNames.length);
+    Utils.computeStats(stats, numRuns * tableNames.length, 1);
   }
   
   private static void testGetFeaturesForAll(String servicesUrl, String[] tableNames)  throws Exception{
@@ -309,7 +309,7 @@ public class FeatureServiceWithoutStatsTester {
         stats[i] = tuple.requestTime * 1.0;
       }
     }
-    Utils.computeStats(stats, numRuns * tableNames.length);
+    Utils.computeStats(stats, numRuns * tableNames.length, 1);
   }
   
   private static void testTotalCountForAll(String servicesUrl, String[] tableNames) {
@@ -322,7 +322,7 @@ public class FeatureServiceWithoutStatsTester {
         stats[i] = tuple.requestTime * 1.0;
       }
     }
-    Utils.computeStats(stats, numRuns * tableNames.length);
+    Utils.computeStats(stats, numRuns * tableNames.length, 1);
   }
 
   private static void testWithStatsAsWhereClause(String fieldName, String servicesUrl, String[] tableNames)  throws Exception{
@@ -343,7 +343,7 @@ public class FeatureServiceWithoutStatsTester {
         runStats[i] = tuple.requestTime * 1.0;
       }
     }
-    Utils.computeStats(runStats, numRuns * tableNames.length);
+    Utils.computeStats(runStats, numRuns * tableNames.length, 1);
   }
 
   private static double getStartingPoint(double percentage, Random random) {

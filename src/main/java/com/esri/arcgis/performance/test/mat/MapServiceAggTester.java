@@ -42,7 +42,7 @@ public class MapServiceAggTester {
       Tuple tuple = mapService.exportMap(boundingBox, 4326, aggStyle, true);
       times[index] = tuple.requestTime * 1.0;
     }
-    Utils.computeStats(times, numCalls);
+    Utils.computeStats(times, numCalls, 1);
   }
 
 }

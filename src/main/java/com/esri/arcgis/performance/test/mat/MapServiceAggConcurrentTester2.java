@@ -1,9 +1,6 @@
 package com.esri.arcgis.performance.test.mat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,50 +11,97 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class MapServiceAggConcurrentTester2 {
+  private  static DecimalFormat df1 = new DecimalFormat("#.#");
+  private  static DecimalFormat df0 = new DecimalFormat("#");
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     if (args.length >= 7) {
       String servicesUrl = args[0];
       String serviceName = args[1];
-      int numThreads = Integer.parseInt(args[2]);
-      int numCalls = Integer.parseInt(args[3]);
-      String fileName = args[4];
-      int lines2Skip = Integer.parseInt(args[5]);
-
-      String outputFileName = args[6];
+      String datasetSize = args[2];
+      int numThreads = Integer.parseInt(args[3]);
+      int numCalls = Integer.parseInt(args[4]);
+      String bboxFileFolder = args[5];
+      int lines2Skip = Integer.parseInt(args[6]);
 
       String aggregationStyle = "square";
       if (args.length >= 8) {
         aggregationStyle = args[7];
       }
+      String outputFileName = "";
+      if (args.length >= 9 )  {
+        outputFileName = args[8];
+      }
+
       int featureLimit = 1000;
-      if (args.length >= 9) featureLimit = Integer.parseInt(args[8]);
+      if (args.length >= 10) featureLimit = Integer.parseInt(args[9]);
 
       int timeoutInSeconds = 100;
-      if (args.length >= 10) timeoutInSeconds = Integer.parseInt(args[9]);
+      if (args.length >= 11) timeoutInSeconds = Integer.parseInt(args[10]);
 
-      concurrentTesting(servicesUrl, serviceName, numThreads, numCalls, fileName, lines2Skip, timeoutInSeconds, aggregationStyle, featureLimit, outputFileName);
+      if (numThreads > 1) {
+        concurrentTesting(servicesUrl, serviceName, datasetSize, numThreads, numCalls, bboxFileFolder, lines2Skip, timeoutInSeconds, aggregationStyle, featureLimit, outputFileName);
+      } else {
+        singleThreadTesting(servicesUrl, serviceName, numCalls, featureLimit,  bboxFileFolder, lines2Skip, timeoutInSeconds, aggregationStyle);
+      }
     } else {
-      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.MapServiceConcurrentTester2 " +
-          "<Services Url> <Service name> <Number of threads> <Number of concurrent calls> <Path to bounding box file> <Number of lines to skip> <Output file name> {<Aggregation Style (square/pointyHexagon/flatTriangle> <Feature Limit> <Timeout in seconds: 100> }");
+      System.out.println("Usage: java -cp ./ms-fs-performance-test-1.0-jar-with-dependencies.jar com.esri.arcgis.performance.test.mat.MapServiceAggConcurrentTester2 " +
+          "<Services Url> <Service name> <Dataset size in String> <Number of threads> <Number of concurrent calls> <Path to bounding box files> <Number of lines to skip> <Aggregation Style (square/pointyHexagon/pointyTriangle)> {<Output file name> <Feature Limit> <Timeout in seconds: 100> }");
     }
+  }
+
+  private static void singleThreadTesting(String servicesUrl, String serviceName, int numbTests, int featureLimit,
+                                          String bboxFileName, int lines2Skip, int timeoutInSeconds, String aggregationStyle) throws IOException {
+    df0.setGroupingUsed(true);
+    df0.setGroupingSize(3);
+    df1.setGroupingUsed(true);
+    df1.setGroupingSize(3);
+
+    MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
+    BufferedReader reader = new BufferedReader(new FileReader(bboxFileName));
+    int startIndex = lines2Skip;
+    if (startIndex < 0) startIndex = -1 * startIndex;
+    while (startIndex > 0) {
+      reader.readLine();
+      startIndex--;
+    }
+
+    double totalFeatures = 0;
+    Double[] features = new Double[numbTests];
+    Double[] times = new Double[numbTests];
+    for (int index = 0; index  < numbTests; index++) {
+      long start = System.currentTimeMillis();
+      String aLine = reader.readLine();
+      System.out.println(index + " => " +  aLine);
+      String boundingBox = aLine.split("[|]")[0];
+      long numFeatures = Long.parseLong(aLine.split("[|]")[1]);
+      Tuple tuple = mapService.exportMap(boundingBox, 4326, true);
+      tuple.returnedFeatures = numFeatures;
+      times[index] = (System.currentTimeMillis() - start) * 1.0;
+      features[index] = numFeatures * 1.0;
+      totalFeatures += features[index];
+    }
+
+    String avgFeatures = df0.format(totalFeatures/numbTests);
+    System.out.println("| avg features | avg (ms) | min (ms) | max (ms) | std_dev (ms) | avg (fs) | min (fs) | max (fs) | std dev (fs) | ");
+    System.out.print("| " + avgFeatures + " | " + Utils.computeStats(times, numbTests, 1));
+    System.out.println(" | " + Utils.computeStats(features, numbTests, 0) + " |");
   }
 
   private static Callable<Tuple> createTask(String servicesUrl, String serviceName, String boundingBox, int timeoutInSeconds, String aggregationStyle, long numFeatures, int featureLimit) {
     Callable<Tuple> task = () -> {
       MapService mapService = new MapService(servicesUrl, serviceName, timeoutInSeconds, aggregationStyle, featureLimit);
-      Tuple tuple = mapService.exportMap(boundingBox, 4326, true);
+      Tuple tuple = mapService.exportMap(boundingBox, 4326, false);
       tuple.returnedFeatures = numFeatures;
       return tuple;
     };
     return task;
   }
 
-  private static void concurrentTesting(String servicesUrl, String serviceName, int numbThreads, int numbConcurrentCalls,
-                                        String bboxFile, int lines2Skip, int timeoutInSeconds, String aggregationStyle, int featureLimit, String outputFileName) {
+  private static void concurrentTesting(String servicesUrl, String serviceName, String datasetSize, int numbThreads, int numbConcurrentCalls,
+                                        String bboxFileFolder, int lines2Skip, int timeoutInSeconds, String aggregationStyle, int featureLimit, String outputFileName) {
     ExecutorService executor = Executors.newFixedThreadPool(numbThreads);
 
-    int port = 9000;
     DecimalFormat df = new DecimalFormat("#.#");
     df.setGroupingUsed(true);
     df.setGroupingSize(3);
@@ -66,16 +110,13 @@ public class MapServiceAggConcurrentTester2 {
     List<Callable<Tuple>> callables = new LinkedList<>();
 
     try {
-      BufferedReader reader = new BufferedReader(new FileReader(bboxFile));
-      String line = reader.readLine();
 
-      while (line != null && lines2Skip > 0) {
-        line = reader.readLine();
-        lines2Skip--;
-      }
+      List<String> extents = Utils.getPreGeneratedRandomExtents(bboxFileFolder, datasetSize, lines2Skip, numbConcurrentCalls);
+      if (extents.size() != numbConcurrentCalls) throw new Exception("Not enough extents");
 
       int lineRead = 0;
-      while (line != null && lineRead < numbConcurrentCalls) {
+      while (lineRead < numbConcurrentCalls) {
+        String line = extents.get(lineRead);
         String[] bboxAndNumFeatures = line.split("[|]");
         if (bboxAndNumFeatures.length == 2) {
           String boundingBox = bboxAndNumFeatures[0];
@@ -83,7 +124,6 @@ public class MapServiceAggConcurrentTester2 {
           callables.add(createTask(servicesUrl, serviceName, boundingBox, timeoutInSeconds, aggregationStyle, numFeatures, featureLimit));
         }
         lineRead++;
-        line = reader.readLine();
       }
 
       Stream<Tuple> results =
