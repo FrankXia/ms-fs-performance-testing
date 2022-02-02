@@ -756,15 +756,19 @@ Sample command:
 |  geohash   | 78,158 | 561.2 | 268 | 2,074 | 539.2 | 78,158 | 52,062 | 98,558 | 16,553 |
 |  geohash   | 78,158 | 462.9 | 307 | 901 | 171 | 78,158 | 52,062 | 98,558 | 16,553 |
 |  geohash   | 78,158 | 465.1 | 265 | 890 | 185.9 | 78,158 | 52,062 | 98,558 | 16,553 |
+| Average    |        |   496.4    |
 |  square    | 78,036 | 454.5 | 280 | 1,418 | 345.5 | 78,036 | 54,184 | 98,516 | 16,523 |
 |  square    | 78,036 | 429.4 | 264 | 923 | 189 | 78,036 | 54,184 | 98,516 | 16,523 |
 |  square    | 78,036 | 473.1 | 334 | 938 | 176.8 | 78,036 | 54,184 | 98,516 | 16,523 |
+| Average    |        |  452.3     |
 |  pointy triangle | 78,755 | 484.5 | 346 | 929 | 198.4 | 78,755 | 54,886 | 98,576 | 15,829 |
 |  pointy triangle | 78,755 | 414.4 | 292 | 913 | 179.4 | 78,755 | 54,886 | 98,576 | 15,829 |
 |  pointy triangle | 78,755 | 465.1 | 326 | 961 | 181.8 | 78,755 | 54,886 | 98,576 | 15,829 |
+| Average    |        |  454.7     |
 |  pointy hexagon  | 78,306 | 422.5 | 277 | 928 | 187 | 78,306 | 54,716 | 98,218 | 15,938 |
 |  pointy hexagon  | 78,306 | 437.5 | 263 | 964 | 202.3 | 78,306 | 54,716 | 98,218 | 15,938 |
 |  pointy hexagon  | 78,306 | 432.7 | 257 | 956 | 195.8 | 78,306 | 54,716 | 98,218 | 15,938 |
+| Average    |        |  430.9     |
 
 Sample command: `java -cp ./target/ms-fs-performance-test-1.0-jar-with-dependencies.jar  com.esri.arcgis.performance.test.mat.MapServiceAggWithRandomBBoxTester https://us-iotdev.arcgis.com/opensearch03/cqvgkj9zrnkn9bcu/maps/arcgis/rest/services planes_100k_bat_fl 100k 10 ./random_extents 2 square`
 
