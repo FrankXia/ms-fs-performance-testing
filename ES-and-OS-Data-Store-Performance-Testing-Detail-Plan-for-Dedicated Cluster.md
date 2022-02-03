@@ -212,29 +212,29 @@ Aggregation Performance testing via Feature Service REST API for each index crea
 
 ### Single Thread Testing Cases
 
-#### Single-thread (1), Index size: 100,000, aggregation average time for 20 consecutive requests
+#### Single-thread (1), Index size: 100,000, aggregation average time for 20 consecutive requests (use average over 2 or more tests)
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
-| ES/ES | 922.9 | 654.8 | 1162.6 | 961.5 |
-| ES/OS | 1029 | 1165.8 | 2319.6 | 2316.8 |
-| OS/OS | 1170.3 | 1500.1 | 1591.6 | 1615.2 |
+| ES/ES | 715.2 | 654.8 | 1283.3 | 961.5 |
+| ES/OS | 896.4 | 1107.7 | 1650.9 | 1764.1 |
+| OS/OS | 881.7 | 1234 | 1456.4 | 1402.1 |
 
 #### Single-thread (2), Index size: 1 million, aggregation average time for 20 consecutive requests
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
 | ES/ES | 613.5 | 1193.3 | 1549.2 | 1530.6 |
-| ES/OS | 839.5 | 1204.2 | 1571.3 | 1428.7 |
-| OS/OS | 1043.8 | 1251.8 | 1641.8 | 1387.4 |
+| ES/OS | 849.6 | 1270 | 1685 | 1406.9 |
+| OS/OS | 885.2 | 1086.2 | 1537.7 | 1351.4 |
 
 #### Single-thread (3), Index size: 10 millions, aggregation average time for 20 consecutive requests
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
 | ES/ES | 903.8 | 1231 | 1529.1 | 2063 |
-| ES/OS | 1007.5 | 1270.9 | 1786 | 2026.4 |
-| OS/OS | 1126.5 | 1316 | 1611.1 | 2065.4 |
+| ES/OS | 893 | 1154.7 | 1593.8 | 1790.1 |
+| OS/OS | 936.1 | 1092.1 | 1588.4 | 2008.9 |
 
 ### Multi-Threads Testing Cases
 
@@ -355,25 +355,25 @@ Aggregation Performance testing via Map Service REST API (ExportImage) for each 
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
-| ES/ES | 708.3 | 665.8 | 667.8 | 682 |
-| OS/ES | 739 | 523.6 | 530.7 | 550.3 |
-| OS/OS | 643.5 | 561.1 | 525.4 | 393.9 |
+| ES/ES | 811.8 | 639 | 645.3 | 579.5 |
+| OS/ES | 588.2 | 501.2 | 584.1 | 502.8 |
+| OS/OS | 572.3 | 497.5 | 503.6 | 447.2 |
 
 #### Single-thread (2), Index size: 1 million, aggregation average time for 20 consecutive requests
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
-| ES/ES | 1,025.7 | 639 | 645.3 | 579.5 |
-| OS/ES | 680.4 | 671.4 | 657.2 | 587.8 |
-| OS/OS | 626.8 | 591.6 | 603.3 | 561.4 |
+| ES/ES | 701.3 | 665.8 | 667.8 | 682 |
+| OS/ES | 596.9 | 579.6 | 590.4 | 584.3 |
+| OS/OS | 539.2 | 556.2 | 590.1 | 558.7 |
 
 #### Single-thread (3), Index size: 10 millions, aggregation average time for 20 consecutive requests
 
 | Data Store (write/read) | GeoHash | Square | Pointy Triangle | Pointy Hexagon |
 | --- | --- | --- | --- | --- |
-| ES/ES | 1,404.4 | 1,249.2 | 1,305.6 | 1,234.4 |
-| ES/OS | 1260.3 | 1194 | 1233.4 | 1283 |
-| OS/OS | 1230.1 | 1191.9 | 1205.5 | 1281.5 |
+| ES/ES | 1224.0 | 1,249.2 | 1,305.6 | 1,234.4 |
+| ES/OS | 951.9 | 948.8 | 953.3 | 1009.9 |
+| OS/OS | 892.0 | 900.3 | 799.7 | 940.3 |
 
 ### Multi-Threads Testing Cases
 
