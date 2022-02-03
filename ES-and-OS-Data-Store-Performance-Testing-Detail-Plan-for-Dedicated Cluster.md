@@ -99,21 +99,21 @@ First, generating 3,100 random extents for each individual indexes and each feat
 
 ### Single Thread Testing Cases
 
-#### Single Thread (1), Index size: 100,000, averaging time for 20 consecutive requests
+#### Single Thread (1), Index size: 100,000, averaging time for 20 consecutive requests (the max values are showed here)
 
 | Data Store (write/read) | Feature querying 1000 – 1500 (ms) | Feature querying 5000 - 5500 (ms) | Feature querying 9500 - 10000 (ms) |
 | --- | --- | --- | --- |
-| ES/ES | 995.4 | 1881.5 | 2586.6 |
-| ES/OS | 783.2 | 1504.2 | 1704.5 |
-| OS/OS | 651.3 | 1,243.2 | 1,562.6 |
+| ES/ES | 995.4 | 1,881.5 | 2,856.6 |
+| ES/OS | 783.2 | 1,504.2 | 2,336.6 |
+| OS/OS | 651.3 | 1,425.1 | 1,771.0 |
 
 #### Single Thread (2), Index size: 1 million, averaging time for 20 consecutive requests
 
 | Data Store (write/read) | Feature querying 1000 – 1500 (ms) | Feature querying 5000 - 5500 (ms) | Feature querying 9500 - 10000 (ms) |
 | --- | --- | --- | --- |
 | ES/ES | 619.8 | 1656.5 | 2665.1 |
-| ES/OS | 813.3 | 1112.5 | 1676.5 |
-| OS/OS | 634.2 | 1,160.8 | 1,520.1 |
+| ES/OS | 813.3 | 2335.8 | 2077.3 |
+| OS/OS | 634.2 | 1,160.8 | 1,880.7 |
 
 #### Single Thread (3), Index size: 10 milions, averaging time for 20 consecutive requests
 
@@ -121,7 +121,7 @@ First, generating 3,100 random extents for each individual indexes and each feat
 | --- | --- | --- | --- |
 | ES/ES | 938.8 | 1423.7 | 2353.3 |
 | ES/OS | 1126.5 | 1803.9 | 2050.6 |
-| OS/OS | 673.8 | 1,353 | 1,766.8 |
+| OS/OS | 673.8 | 1,353.0 | 2517.6 |
 
 ### Multi-Threads Testing Cases
 
