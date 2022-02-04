@@ -1,4 +1,4 @@
-#### 01-21-2022, 01-24-2022
+## 01-21-2022, 01-24-2022, with new memory settings (double the settings for Elasticsearch)
 
 ## OpenSearch 1.1.0 (write). BATs with different loading sizes without any analytics
 
@@ -35,3 +35,30 @@ testing cases on 1/21.
 
 *4 one of the datastore master nodes lost after (or during the last step of) the job is done. The finishing time is estimated since the BAT log wasn't available
 anymore after the master node lost connection to the data store cluster (the master pod is still visible from K8s).
+
+## 01-26:01-28-2022, with new memory settings (double the settings for Elasticsearch)
+
+## OpenSearch 1.2.4 (write). BATs with different loading sizes without any analytics
+
+| Dataset Size | source csv files | time (min) | coordinating_rejections | Comments |
+| ------------ | -----------------| -----------| -------- | -------------- |
+| 10,015,270   |  1m (109.5 MB)   |   5.24     |      3   | tested on 1/26, no error from Spark Driver logs |
+| 15,022,905   |  1m (109.5 MB)   |   6.66     |      2   | tested on 1/26, no error from Spark Driver logs |  
+| 20,030,540   |  1m (109.5 MB)   |   9.30     |      8   | tested on 1/27, spark driver logs has 200MB errors  |  
+| 20,030,540   |  1m (109.5 MB)   |   9.40     |      5   | tested on 1/27, no error from spark driver   |  
+| 25,038,175   |  1m (109.5 MB)   |  10.58     |      6   | tested on 1/28, no error from spark driver   |  
+
+## OpenSearch 1.2.4 (write). BATs with different loading sizes with 100 meter buffer
+
+| Dataset Size | source csv files | time (min) | coordinating_rejections | Comments |
+| ------------ | -----------------| -----------| -------- | ----------------------- |
+| 10,015,270   |  1m (109.5 MB)   |   57.24    |      0   | tested on 1/26, no error log from Spark Driver, no record missing or added |
+| 15,141,059   |  1m (109.5 MB)   |   89.18    |      1   | tested on 1/26, no error log from Spark Driver, 118,154 records added |
+| 20,148,694   |  1m (109.5 MB)   |  123.85    |      1   | tested on 1/27, no error log from Spark Driver, 118,154 records added |
+| 25,038,175   |  1m (109.5 MB)   |  153.54    |      1   | tested on 1/28, no error log from Spark Driver, no record missing or added |
+
+Note: 
+
+It is interesting to note that the testing of 25 million BATs, the one without any analytic tool encountered 6 (master nodes) "coordinating_rejections" errors 
+while the BAT with 100 meter buffering operation only had 1 error and more amazingly it didn't add or lose any record while yesterdays' 15/20 million cases 
+experienced the same amount of increased records (mostly due to rejection error and BAT/Spark re-run the partitioned small tasks). 
