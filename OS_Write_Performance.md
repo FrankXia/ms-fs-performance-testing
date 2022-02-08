@@ -61,4 +61,30 @@ Note:
 
 It is interesting to note that the testing of 25 million BATs, the one without any analytic tool encountered 6 (master nodes) "coordinating_rejections" errors 
 while the BAT with 100 meter buffering operation only had 1 error and more amazingly it didn't add or lose any record while yesterdays' 15/20 million cases 
-experienced the same amount of increased records (mostly due to rejection error and BAT/Spark re-run the partitioned small tasks). 
+experienced the same amount of increased records (mostly due to rejection error and BAT/Spark re-run the partitioned small tasks).
+
+## 02-07-2022, with multiple new memory settings for master nodes
+
+All testing cases load data from 1-million CSV files (109.5 MB/each) from an Amazon S3 bucket. 
+Tested on a data store cluster with OpenSearch 1.2.4. 
+
+| Dataset Size | JVM Memory | Container Resource Limit  | Relative to defaults | time (min) | records loaded | Comments |
+| ------------ | ---------- | ------------------------- | ---------------------| -----------| -------------- | -------- |
+| 10,015,270   |   1024MB   |  2.00 Gi                  |        1.00          |     N/A    |    5,687,742   | fail to finish, missed 4,327,528 | 
+| 10,015,270   |   1024MB   |  2.00 Gi                  |        1.00          |     N/A    |    9,599,185   | fail to finish, missed 416,085 | 
+| 10,015,270   |   1280MB   |  2.25 Gi                  |        1.25          |     4.48   |   10,449,496   | finished but added 434,226  |
+| 10,015,270   |   1280MB   |  2.25 Gi                  |        1.25          |     4.30   |   10,231,934   | finished but added 216,664  |
+| 10,015,270   |   1536MB   |  3.00 Gi                  |        1.50          |     4.58   |   10,015,270   | finished with correct number of records  |
+| 10,015,270   |   1536MB   |  3.00 Gi                  |        1.50          |     4.24   |   10,015,270   | finished with correct number of records  |
+| 10,015,270   |   1536MB   |  3.00 Gi                  |        1.50          |     4.19   |   10,015,270   | finished with correct number of records  |
+| 10,015,270   |   2048MB   |  4.00 Gi                  |        2.00          |     4.34   |   10,015,270   | finished with correct number of records  |
+| -----------  | ---------- |
+| 15,022,905   |   1536MB   |  3.00 Gi                  |        1.50          |     6.29   |   15,022,905   | finished with correct number of records |
+| 15,022,905   |   1536MB   |  3.00 Gi                  |        1.50          |     6.23   |   15,022,905   | finished with correct number of records |
+| 15,022,905   |   1536MB   |  3.00 Gi                  |        1.50          |     6.10   |   15,022,905   | finished with correct number of records |
+| -----------  | ---------- |
+| 20,030,540   |   1536MB   |  3.00 Gi                  |        1.50          |     8.00   |   20,030,540   | finished with correct number of records |
+| 20,030,540   |   1536MB   |  3.00 Gi                  |        1.50          |     8.40   |   20,030,540   | finished with correct number of records, 13 coordinating_rejections |
+
+Note: for the current datastore configuration with 3 master nodes, the case with 1.5 times more memory than defaults, it 
+will need to add total 3Gi to the requested resources for its container. 
