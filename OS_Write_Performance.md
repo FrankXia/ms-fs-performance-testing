@@ -87,4 +87,85 @@ Tested on a data store cluster with OpenSearch 1.2.4.
 | 20,030,540   |   1536MB   |  3.00 Gi                  |        1.50          |     8.40   |   20,030,540   | finished with correct number of records, 13 coordinating_rejections |
 
 Note: for the current datastore configuration with 3 master nodes, the case with 1.5 times more memory than defaults, it 
-will need to add total 3Gi to the requested resources for its container. 
+will need to add total 3Gi to the requested resources for its container.
+
+## 02-08/02-09-2022, with new memory settings for master nodes
+
+All testing cases load data from 1-million CSV files (109.5 MB/each) from an Amazon S3 bucket.
+Tested on a data store cluster with OpenSearch 1.2.4.
+
+| Dataset Size | records loaded | time (min) | Container Resource Limit  | JVM Memory | Relative to defaults  |  Comments |
+| ------------ | -------------- | ---------- | --------------------------| -----------| --------------------- | --------- |
+| - the same BAT ran twice ---  | ---------- |
+| 10,015,270   |  10,015,270    |   5.40     |         2.00 Gi           |  1536 MB   |        1.50           | finished but with over 200MB error logs in Spark Driver |
+| 10,015,270   |  10,015,270    |   5.00     |         2.00 Gi           |  1536 MB   |        1.50           | finished but with over 200MB error logs in Spark Driver |
+| - the same BAT ran twice --   | ------     |
+| 10,015,270   |  10,015,270    |   4.70     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records | 
+| 10,015,270   |  10,015,270    |   4.00     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+| - the same BAT ran twice --   |  ------    |
+| 10,015,270   |  10,015,270    |   4.50     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records | 
+| 10,015,270   |  10,015,270    |   4.70     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+| - the same BAT ran twice --   | ------     |
+| 15,022,905   |  15,022,905    |   6.50     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records | 
+| 15,022,905   |  15,022,905    |   6.30     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+| -- the same BAT ran 3 times   | ------     |
+| 20,030,540   |  28,628,490    |   8.00     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records, but Spark Driver pod restarted after running 3 min or so, so extra 8,597,950 records loaded |
+| 20,030,540   |  20,030,540    |   8.20     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+| 20,030,540   |  20,030,540    |   8.90     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+| -- the same BAT ran twice --  | ------     |
+| 25,038,175   |  25,331,042    |   9.70     |         2.00 Gi           |  1536 MB   |        1.50           | finished but added extra 292,867 records, and 6 coordinating_rejections |
+| 25,038,175   |  25,038,175    |   9.70     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records and 6 coordinating_rejections |
+
+## 02-09-2022, with new memory settings for master nodes, add 100m buffer and output polygons
+
+| Dataset Size | records loaded | time (min) | Container Resource Limit  | JVM Memory | Relative to defaults  |  Comments |
+| ------------ | -------------- | ---------- | --------------------------| -----------| --------------------- | --------- |
+| 10,015,270   |  10,290,956    |  56.37     |         2.00 Gi           |  1536 MB   |        1.50           | finished but added extra 275,686 records/polygons and 6 coordinating_rejections | 
+| 15,022,905   |  15,771,367    |  82.49     |         2.00 Gi           |  1536 MB   |        1.50           | finished but added extra 748,642 records/polygons and 11 coordinating_rejections | 
+
+
+
+#### Set OPENSEARCH_JAVA_OPTS to 1.75Gi failed
+
+Set OPENSEARCH_JAVA_OPTS to 1.75Gi (with resource limit of 2Gi) failed to restart the 3 master node' pods 
+The 3 master nodes' status change over 8 minutes.
+(base) FXia4:~ frank$ kubectl get pods 
+NAME                                             READY   STATUS             RESTARTS   AGE
+datastore-elasticsearch-master-0                 1/1     Running            2          157m
+datastore-elasticsearch-master-1                 1/1     Running            2          157m
+datastore-elasticsearch-master-2                 0/1     Terminating        2          157m
+---- 
+datastore-elasticsearch-master-0                 1/1     Running            2          157m
+datastore-elasticsearch-master-1                 1/1     Running            2          157m
+datastore-elasticsearch-master-2                 0/1     Init:1/3           0          35s
+---- 
+datastore-elasticsearch-master-0                 0/1     OOMKilled          2          159m
+datastore-elasticsearch-master-1                 0/1     OOMKilled          2          95s
+datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   3          2m24s
+---- 
+datastore-elasticsearch-master-0                 1/1     Running            3          160m
+datastore-elasticsearch-master-1                 1/1     Running            3          110s
+datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   3          2m39s
+----
+datastore-elasticsearch-master-0                 1/1     Running            3          160m
+datastore-elasticsearch-master-1                 0/1     CrashLoopBackOff   3          2m14s
+datastore-elasticsearch-master-2                 1/1     Running            4          3m3s
+---- 
+datastore-elasticsearch-master-0                 1/1     Running            3          160m
+datastore-elasticsearch-master-1                 0/1     CrashLoopBackOff   3          2m36s
+datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   4          3m25s
+---- 
+datastore-elasticsearch-master-0                 1/1     Running            3          162m
+datastore-elasticsearch-master-1                 0/1     OOMKilled          5          4m30s
+datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   5          5m19s
+----
+datastore-elasticsearch-master-0                 1/1     Running            3          164m
+datastore-elasticsearch-master-1                 0/1     CrashLoopBackOff   5          6m12s
+datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   5          7m1s
+----
+atastore-elasticsearch-master-0                  1/1     Running            3          165m
+datastore-elasticsearch-master-1                 0/1     CrashLoopBackOff   5          6m57s
+datastore-elasticsearch-master-2                 0/1     OOMKilled          6          7m46s
+----
+
+
