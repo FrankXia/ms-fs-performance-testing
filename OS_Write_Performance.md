@@ -166,6 +166,33 @@ datastore-elasticsearch-master-2                 0/1     CrashLoopBackOff   5   
 atastore-elasticsearch-master-0                  1/1     Running            3          165m
 datastore-elasticsearch-master-1                 0/1     CrashLoopBackOff   5          6m57s
 datastore-elasticsearch-master-2                 0/1     OOMKilled          6          7m46s
-----
+
+
+
+## 02-10-2022, with new memory settings for master nodes and ArcGIS Velocity version of 3.1.0.1575
+
+All testing cases load data from 1-million CSV files (109.5 MB/each) from an Amazon S3 bucket.
+Tested on a data store cluster with OpenSearch 1.2.4.
+
+| Dataset Size | records loaded | time (min) | Container Resource Limit  | JVM Memory | Relative to defaults  |  Comments |
+| ------------ | -------------- | ---------- | --------------------------| -----------| --------------------- | --------- |
+| - the same BAT ran twice ---  | ---------- |
+| 10,015,270   |  10,015,270    |   5.70     |         2.00 Gi           |  1536 MB   |        1.50           | finished with "coordinating_rejections": 5 |
+| 10,015,270   |  10,015,270    |   4.60     |         2.00 Gi           |  1536 MB   |        1.50           | finished with "coordinating_rejections": 2 |
+| - the same BAT ran twice --   | ------     |
+| 15,022,905   |  15,022,905    |   7.43     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records | 
+| 15,022,905   |  15,022,905    |   7.40     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records but with over 200MB log from Spark Driver pod |
+| -- the same BAT ran 2 times   | ------     |
+| 20,030,540   |  20,106,744    |   8.90     |         2.00 Gi           |  1536 MB   |        1.50           | finished but so extra 76,204 records loaded |
+| 20,030,540   |  20,030,540    |   8.59     |         2.00 Gi           |  1536 MB   |        1.50           | finished with correct number of records |
+
+## 02-11-2022, with new memory settings for master nodes, add 100m buffer and output polygons
+
+| Dataset Size | records loaded | time (min) | Container Resource Limit  | JVM Memory | Relative to defaults  |  Comments |
+| ------------ | -------------- | ---------- | --------------------------| -----------| --------------------- | --------- |
+| 10,015,270   |  10,487,902    |  62.53     |         2.00 Gi           |  1536 MB   |        1.50           | finished but added extra 472,632 records/polygons and 5 coordinating_rejections | 
+| 15,022,905   |  24,133,128    |    N/A     |         2.00 Gi           |  1536 MB   |        1.50           | with multiple restarts with errors and added much more records | 
+| 15,022,905   |  15,731,950    |  96.17     |         2.00 Gi           |  1536 MB   |        1.50           | finished without errors and added 709,045 records, and has 4 coordinating_rejections | 
+
 
 
