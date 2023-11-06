@@ -63,15 +63,15 @@ public class Utils {
       }
       resultString = result.toString();
     }
-    response.close();
+    //response.close();
 
-    if (closeClient) {
-      try {
-        client.close();
-      } finally {
-        client.close();
-      }
-    }
+//    if (closeClient) {
+//      try {
+//        client.close();
+//      } finally {
+//        client.close();
+//      }
+//    }
 
     if (responseCode == 200)
       return resultString;
@@ -112,16 +112,22 @@ public class Utils {
 
   private static Random random = new Random();
   static String getRandomBoundingBox(double width, double height) {
-    double MAX_W = 360;
-    double MAX_H = 180;
-    double MIN_X = -180;
-    double MIN_Y = -90;
+//    double MAX_W = 360;
+//    double MAX_H = 180;
+//    double MIN_X = -180;
+//    double MIN_Y = -90;
+//
+//    double randomX = random.nextDouble();
+//    double randomY = random.nextDouble();
+//    double minx = MIN_X + randomX * (MAX_W - width);
+//    double miny = MIN_Y + randomY * (MAX_H - height);
 
-    double randomX = random.nextDouble();
-    double randomY = random.nextDouble();
-    double minx = MIN_X + randomX * (MAX_W - width);
-    double miny = MIN_Y + randomY * (MAX_H - height);
-    String bbox = minx +"," + miny + "," + (minx + width) + "," + (miny + height);
+    double minx = -170.816666666667;
+    double miny = 17.1166666666667;
+    double maxx = -46.5333333333333;
+    double maxy = 70.7333333333333;
+//    String bbox = minx +"," + miny + "," + (minx + width) + "," + (miny + height);
+    String bbox = minx +"," + miny + "," + maxx + "," + maxy;
     System.out.println(bbox);
     return bbox;
   }

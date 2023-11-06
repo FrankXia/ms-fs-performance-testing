@@ -98,11 +98,11 @@ public class FeatureServiceTester {
   private static void testGFeaturesWithBoundingBoxAndTimeExtentAndSQLIN(String servicesUrl, String[] tableNames, double boundingBoxWidth) {
     System.out.println("======== get features from each service with a 10 degree random bounding box and time extent and IN parameter ========= ");
 
-    String fieldName = "orig";
+    String fieldName = "id";
     boolean isStringField = true;
 
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
-    String timeFieldName = "ts";
+    String timeFieldName = "clock";
 
     try {
       for (String table : tableNames) {
@@ -120,7 +120,7 @@ public class FeatureServiceTester {
     System.out.println("======== get features from each service with a 10 degree random bounding box and time extent ========= ");
     String boundingBox = Utils.getRandomBoundingBox(boundingBoxWidth, boundingBoxWidth/2);
 
-    String fieldName = "ts";
+    String fieldName = "clock";
     try {
       for (String table : tableNames) {
         FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
@@ -134,8 +134,8 @@ public class FeatureServiceTester {
 
   private static void testGetFeaturesWithSQLIn(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with sSQL IN (xxx,xxx) ========= ");
-    String fieldName = "plane_id";
-    boolean isStringField = false;
+    String fieldName = "gs";
+    boolean isStringField = true;
 
     try {
       for (String table : tableNames) {
@@ -150,10 +150,10 @@ public class FeatureServiceTester {
 
   private static void testGetFeaturesWithTimeExtent(String servicesUrl, String[] tableNames) {
     System.out.println("======== get features from each service with time filter ========= ");
-    String fieldName = "ts";
-    String pattern = "yyyy-MM-dd HH:mm:ss";
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    String fieldName = "clock";
+//    String pattern = "yyyy-MM-dd HH:mm:ss";
+//    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+//    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     try {
       for (String table : tableNames) {
         FeatureService featureService = new FeatureService(servicesUrl, table, timeoutInSeconds, false);
@@ -167,7 +167,13 @@ public class FeatureServiceTester {
 
   private static void testGetFeaturesWithSpeedRange(String servicesUrl, String[] tableNames) throws Exception {
     System.out.println("======== get features from each service with speed range ========= ");
-    String fieldName = "speed";
+    String fieldName = "alt";
+    testWithStatsAsWhereClause(fieldName, servicesUrl, tableNames);
+  }
+
+  private static void testGetFeaturesWithRange(String servicesUrl, String[] tableNames) throws Exception {
+    System.out.println("======== get features from each service with speed range ========= ");
+    String fieldName = "alt";
     testWithStatsAsWhereClause(fieldName, servicesUrl, tableNames);
   }
 
@@ -211,12 +217,23 @@ public class FeatureServiceTester {
     }
   }
 
-  private static String getTimeExtent(FeatureService featureService, String fieldName) throws Exception {
+  private static String getTimeExtent1(FeatureService featureService, String fieldName) throws Exception {
     JSONObject stats = featureService.getFieldStats(fieldName);
     String minTimestamp = stats.getString("min").replace("T", " ").replace("Z", "");
     String maxTimestamp = stats.getString("max").replace("T", " ").replace("Z", "");
     long min = simpleDateFormat.parse(minTimestamp).getTime();
     long max = simpleDateFormat.parse(maxTimestamp).getTime();
+//    double random = new Random().nextDouble() * (max - min);
+//    long randomLong = (long) (random < 0 ? random * (-1) : random);
+    long randomLong = (long) (0.5 * (max - min));
+    String mTimestamp = min + ","+ (min + randomLong);
+    return mTimestamp;
+  }
+
+  private static String getTimeExtent(FeatureService featureService, String fieldName) throws Exception {
+    JSONObject stats = featureService.getFieldStats(fieldName);
+    long min = stats.getLong("min");
+    long max = stats.getLong("max");
 //    double random = new Random().nextDouble() * (max - min);
 //    long randomLong = (long) (random < 0 ? random * (-1) : random);
     long randomLong = (long) (0.5 * (max - min));

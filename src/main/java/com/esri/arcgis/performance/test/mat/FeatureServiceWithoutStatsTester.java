@@ -76,14 +76,14 @@ public class FeatureServiceWithoutStatsTester {
       if (codes.equals("0")) testTotalCountForAll(servicesUrl, tableNames);
       if (codes.equals("1")) testGetFeaturesForAll(servicesUrl, tableNames);
       if (codes.equals("2")) {
-        String fieldName = "speed";
+        String fieldName = "alt";
         if (args.length > 5) fieldName = args[5];
         if (args.length > 6) percentage = Double.parseDouble(args[6]) / 100.0;
         testGetFeaturesWithSpeedRange(servicesUrl, tableNames, fieldName);
       }
       if (codes.equals("3")) {
-        String uniqueFieldName = "plane_id";
-        boolean isUniqueFieldAStringField = false;
+        String uniqueFieldName = "id";
+        boolean isUniqueFieldAStringField = true;
         if (args.length > 5) uniqueFieldName = args[5];
         if (args.length > 6) isUniqueFieldAStringField = Boolean.parseBoolean(args[6]);
         testGetFeaturesWithSQLIn(servicesUrl, tableNames, uniqueFieldName, isUniqueFieldAStringField);

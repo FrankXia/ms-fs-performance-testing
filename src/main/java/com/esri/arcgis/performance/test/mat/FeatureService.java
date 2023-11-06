@@ -27,7 +27,9 @@ import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -43,13 +45,14 @@ public class FeatureService {
   private String keyspace = "esri_ds_data";
 
   // 36 parameters
-  private String where = "";
+  private String where = "1=1";
   private String objectIds = "";
   private String time = "";
+  private String defaultSR = "4326";
   private String geometry = "";
   private String geometryType = "esriGeometryEnvelope";
   private String geohash = "";
-  private String inSR = "";
+  private String inSR = "4326";
   private String spatialRel = "esriSpatialRelIntersects";
   private String distance = "";
   private String units = "esriSRUnit_Foot";
@@ -58,7 +61,7 @@ public class FeatureService {
   private boolean returnGeometry = true;
   private String maxAllowableOffset ="";
   private String geometryPrecision = "";
-  private String outSR = "";
+  private String outSR = "4326";
   private String gdbVersion = "";
   private boolean returnDistinctValues = false;
   private boolean returnIdsOnly = false;
@@ -74,10 +77,13 @@ public class FeatureService {
   private int resultRecordCount = 10000;
   private String lod = "";
   private String lodType = "square";
-  private String lodSR = "";
+  private String lodSR = "102100";
   private String timeInterval = "";
   private String timeUnit = "minutes";
+  private boolean returnCentroid = false;
   private boolean returnClusters = false;
+  private String clusterTolerance = "";
+  private String quantizationParameters = "";
   private boolean returnFullLodGrid = false;
   private String f = "json";
 
@@ -85,10 +91,225 @@ public class FeatureService {
   private String cookieOrToken = null;
 
   private static int errorCount = 0;
-  private static int totalCount = 0;
+  private static int queryRequestCount = 0;
+
+  public void setRandom(Random random) {
+    this.random = random;
+  }
+
+  public void setHttpClient(CloseableHttpClient httpClient) {
+    this.httpClient = httpClient;
+  }
+
+  public void setServiceName(String serviceName) {
+    this.serviceName = serviceName;
+  }
+
+  public void setServicesUrl(String servicesUrl) {
+    this.servicesUrl = servicesUrl;
+  }
+
+  public void setKeyspace(String keyspace) {
+    this.keyspace = keyspace;
+  }
+
+  public void setWhere(String where) {
+    this.where = where;
+  }
+
+  public void setObjectIds(String objectIds) {
+    this.objectIds = objectIds;
+  }
+
+  public void setTime(String time) {
+    this.time = time;
+  }
+
+  public void setDefaultSR(String defaultSR) {
+    this.defaultSR = defaultSR;
+  }
+
+  public void setGeometry(String geometry) {
+    this.geometry = geometry;
+  }
+
+  public void setGeometryType(String geometryType) {
+    this.geometryType = geometryType;
+  }
+
+  public void setGeohash(String geohash) {
+    this.geohash = geohash;
+  }
+
+  public void setInSR(String inSR) {
+    this.inSR = inSR;
+  }
+
+  public void setSpatialRel(String spatialRel) {
+    this.spatialRel = spatialRel;
+  }
+
+  public void setDistance(String distance) {
+    this.distance = distance;
+  }
+
+  public void setUnits(String units) {
+    this.units = units;
+  }
+
+  public void setRelationParam(String relationParam) {
+    this.relationParam = relationParam;
+  }
+
+  public void setOutFields(String outFields) {
+    this.outFields = outFields;
+  }
+
+  public void setReturnGeometry(boolean returnGeometry) {
+    this.returnGeometry = returnGeometry;
+  }
+
+  public void setMaxAllowableOffset(String maxAllowableOffset) {
+    this.maxAllowableOffset = maxAllowableOffset;
+  }
+
+  public void setGeometryPrecision(String geometryPrecision) {
+    this.geometryPrecision = geometryPrecision;
+  }
+
+  public void setOutSR(String outSR) {
+    this.outSR = outSR;
+  }
+
+  public void setGdbVersion(String gdbVersion) {
+    this.gdbVersion = gdbVersion;
+  }
+
+  public void setReturnDistinctValues(boolean returnDistinctValues) {
+    this.returnDistinctValues = returnDistinctValues;
+  }
+
+  public void setReturnIdsOnly(boolean returnIdsOnly) {
+    this.returnIdsOnly = returnIdsOnly;
+  }
+
+  public void setReturnCountOnly(boolean returnCountOnly) {
+    this.returnCountOnly = returnCountOnly;
+  }
+
+  public void setReturnExtentOnly(boolean returnExtentOnly) {
+    this.returnExtentOnly = returnExtentOnly;
+  }
+
+  public void setOrderByFields(String orderByFields) {
+    this.orderByFields = orderByFields;
+  }
+
+  public void setGroupByFieldsForStatistics(String groupByFieldsForStatistics) {
+    this.groupByFieldsForStatistics = groupByFieldsForStatistics;
+  }
+
+  public void setOutStatistics(String outStatistics) {
+    this.outStatistics = outStatistics;
+  }
+
+  public void setReturnZ(boolean returnZ) {
+    this.returnZ = returnZ;
+  }
+
+  public void setReturnM(boolean returnM) {
+    this.returnM = returnM;
+  }
+
+  public void setMultipatchOption(String multipatchOption) {
+    this.multipatchOption = multipatchOption;
+  }
+
+  public void setResultOffset(String resultOffset) {
+    this.resultOffset = resultOffset;
+  }
+
+  public void setResultRecordCount(int resultRecordCount) {
+    this.resultRecordCount = resultRecordCount;
+  }
+
+  public void setLod(String lod) {
+    this.lod = lod;
+  }
+
+  public void setLodType(String lodType) {
+    this.lodType = lodType;
+  }
+
+  public void setLodSR(String lodSR) {
+    this.lodSR = lodSR;
+  }
+
+  public void setTimeInterval(String timeInterval) {
+    this.timeInterval = timeInterval;
+  }
+
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+  }
+
+  public void setReturnCentroid(boolean returnCentroid) {
+    this.returnCentroid = returnCentroid;
+  }
+
+  public void setReturnClusters(boolean returnClusters) {
+    this.returnClusters = returnClusters;
+  }
+
+  public void setClusterTolerance(String clusterTolerance) {
+    this.clusterTolerance = clusterTolerance;
+  }
+
+  public void setQuantizationParameters(String quantizationParameters) {
+    this.quantizationParameters = quantizationParameters;
+  }
+
+  public void setReturnFullLodGrid(boolean returnFullLodGrid) {
+    this.returnFullLodGrid = returnFullLodGrid;
+  }
+
+  public void setF(String f) {
+    this.f = f;
+  }
+
+  public void setTimeoutInSeconds(int timeoutInSeconds) {
+    this.timeoutInSeconds = timeoutInSeconds;
+  }
+
+  public void setCookieOrToken(String cookieOrToken) {
+    this.cookieOrToken = cookieOrToken;
+  }
+
+  public static void setErrorCount(int errorCount) {
+    FeatureService.errorCount = errorCount;
+  }
+
+  public static void setQueryRequestCount(int queryRequestCount) {
+    FeatureService.queryRequestCount = queryRequestCount;
+  }
+
+  public static void setTokenFile(String tokenFile) {
+    FeatureService.tokenFile = tokenFile;
+  }
+
+  public static void setCookieFile(String cookieFile) {
+    FeatureService.cookieFile = cookieFile;
+  }
+
+  public void setUseCookie(boolean useCookie) {
+    this.useCookie = useCookie;
+  }
+
   private static String tokenFile = "./velocity_access_token.txt";
   private static String cookieFile = null; // "./mat-access-cookie.txt";
   private boolean useCookie = false;
+
+
 
   FeatureService(String servicesUrl, String serviceName, int timeoutInSeconds, boolean requireCookieToken) {
     this.serviceName = serviceName;
@@ -285,7 +506,12 @@ public class FeatureService {
     long totalCount = 0L;
     int errorCode = 0;
     long start = System.currentTimeMillis();
-    String queryParameters = composeGetRequestQueryParameters();
+    String queryParameters = null;
+    try {
+      queryParameters = composeGetRequestQueryParameters();
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     String response = executeRequest(queryParameters, closeClient);
     if (response != null) {
       System.out.println(response);
@@ -314,7 +540,12 @@ public class FeatureService {
     int errorCode = 0;
     long totalCount = 0;
     long start = System.currentTimeMillis();
-    String queryParameters = composeGetRequestQueryParameters();
+    String queryParameters = null;
+    try {
+      queryParameters = composeGetRequestQueryParameters();
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     String response = executeRequest(queryParameters, closeClient);
     Envelope2D maxExtent = new Envelope2D();
     if (response != null) {
@@ -420,7 +651,7 @@ public class FeatureService {
     return getFeatures(false, closeClient);
   }
 
-  private Tuple getFeatures(boolean isSpaceTime, boolean closeClient) throws Exception {
+  Tuple getFeatures(boolean isSpaceTime, boolean closeClient) throws Exception {
     long start = System.currentTimeMillis();
     String queryParameters = composeGetRequestQueryParameters();
     String response = executeRequest(queryParameters, closeClient);
@@ -476,11 +707,12 @@ public class FeatureService {
     return new Tuple(System.currentTimeMillis() - start, numFeatures, errorCode);
   }
 
-  private String composeGetRequestQueryParameters() {
+  private String composeGetRequestQueryParameters() throws UnsupportedEncodingException {
     StringBuilder request = new StringBuilder();
-    request.append("where=").append(URLEncoder.encode(where));
+    request.append("where=").append(URLEncoder.encode(where, StandardCharsets.UTF_8.toString()));
     request.append("&objectIds=").append(objectIds);
-    request.append("&time=").append(URLEncoder.encode(time));
+    request.append("&time=").append(URLEncoder.encode(time, StandardCharsets.UTF_8.toString()));
+    request.append("&defaultSR=").append(defaultSR);
     request.append("&geometry=").append(geometry);
     request.append("&geometryType=").append(geometryType);
     request.append("&geohash=").append(geohash);
@@ -501,7 +733,7 @@ public class FeatureService {
     request.append("&returnExtentOnly=").append(returnExtentOnly);
     request.append("&orderByFields=").append(orderByFields);
     request.append("&groupByFieldsForStatistics=").append(groupByFieldsForStatistics);
-    request.append("&outStatistics=").append(URLEncoder.encode(outStatistics));
+    request.append("&outStatistics=").append(URLEncoder.encode(outStatistics, StandardCharsets.UTF_8.toString()));
     request.append("&returnZ=").append(returnZ);
     request.append("&returnM=").append(returnM);
     request.append("&multipatchOption=").append(multipatchOption);
@@ -512,24 +744,29 @@ public class FeatureService {
     request.append("&lodSR=").append(lodSR);
     request.append("&timeInterval=").append(timeInterval);
     request.append("&timeUnit=").append(timeUnit);
+    request.append("&returnCentroid=").append(returnCentroid);
     request.append("&returnClusters=").append(returnClusters);
+    request.append("&clusterTolerance=").append(clusterTolerance);
+    request.append("&quantizationParameters=").append(quantizationParameters);
     request.append("&returnFullLodGrid=").append(returnFullLodGrid);
     request.append("&f=").append(f);
-    if (!useCookie) {
+    if (useCookie) {
       request.append("&").append(cookieOrToken);
     }
 
-    return request.toString();
+    String result1 = request.toString();
+    return result1;
   }
 
   private void resetParameters2InitialValues() {
     this.where = "";
     this.objectIds = "";
     this.time = "";
+    this.defaultSR = "4326";
     this.geometry = "";
     this.geometryType = "esriGeometryEnvelope";
     this.geohash = "";
-    this.inSR = "";
+    this.inSR = "4326";
     this.spatialRel = "esriSpatialRelIntersects";
     this.distance = "";
     this.units = "esriSRUnit_Foot";
@@ -538,7 +775,7 @@ public class FeatureService {
     this.returnGeometry = true;
     this.maxAllowableOffset ="";
     this.geometryPrecision = "";
-    this.outSR = "";
+    this.outSR = "4326";
     this.gdbVersion = "";
     this.returnDistinctValues = false;
     this.returnIdsOnly = false;
@@ -554,7 +791,7 @@ public class FeatureService {
     this.resultRecordCount = 10000;
     this.lod = "";
     this.lodType = "square";
-    this.lodSR = "";
+    this.lodSR = "102100";
     this.timeInterval = "";
     this.timeUnit = "minutes";
     this.returnClusters = false;
@@ -565,21 +802,21 @@ public class FeatureService {
   private String executeRequest(String queryParameters, boolean closeClient) {
     CloseableHttpClient client =  httpClient;
     //HttpClientBuilder.create().build();
-    totalCount++;
+    queryRequestCount++;
     try {
       String url = servicesUrl + serviceName + "/FeatureServer/0/query?" + queryParameters;
       //System.out.println(Thread.currentThread() + " <===> " +  url);
-      //long start = System.currentTimeMillis();
+      long start = System.currentTimeMillis();
 
       // use Apache HttpClient
-      String result = Utils.executeHttpGET(client, url, closeClient, cookieOrToken);
+      String result = Utils.executeHttpGET(client, url, false, cookieOrToken);
       // use simple http client
 //      String result = Utils.executeHttpsSimpleGET(url, cookie);
 
-      //System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName);
+      System.out.println("======> Total request time: " + (System.currentTimeMillis() - start)  + " ms, service name: " + serviceName);
       return result;
     } catch (Exception ex) {
-      System.err.println("Error count => " + (errorCount++) +", total count => " + totalCount + ", " + System.currentTimeMillis());
+      System.err.println("Error count => " + (errorCount++) +", query count => " + queryRequestCount + ", " + System.currentTimeMillis());
       //ex.printStackTrace();
     }
     return null;
@@ -593,10 +830,16 @@ public class FeatureService {
     this.where = "1=1";
     this.resultRecordCount = 100000;
     //long start = System.currentTimeMillis();
-    String queryParameters = composeGetRequestQueryParameters();
+    String queryParameters = null;
+    try {
+      queryParameters = composeGetRequestQueryParameters();
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     String response = executeRequest(queryParameters, true);
     JSONObject jsonObject = new JSONObject(response);
     System.out.println(response);
+
     JSONObject f = jsonObject.getJSONArray("features").getJSONObject(0);
     return f.getJSONObject("attributes");
   }
@@ -611,7 +854,12 @@ public class FeatureService {
     this.outFields = fieldName;
     this.resultRecordCount = 100000;
     this.orderByFields = fieldName;
-    String queryParameters = composeGetRequestQueryParameters();
+    String queryParameters = null;
+    try {
+      queryParameters = composeGetRequestQueryParameters();
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     String response = executeRequest(queryParameters, true);
     JSONObject jsonObject = new JSONObject(response);
     JSONArray features = jsonObject.getJSONArray("features");

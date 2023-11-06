@@ -25,7 +25,7 @@ public class MapServiceRandomAggTester {
       int numThreads = Integer.parseInt(args[4]);
       int startIndex = Integer.parseInt(args[5]);
       startIndex = Math.max(startIndex, 0);
-      String aggStyle = "pointyHexagon";
+      String aggStyle = "pointyTriangle";
       if (args.length >= 7) {
         aggStyle = args[6];
       }
